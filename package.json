@@ -11,9 +11,11 @@
   "dependencies": {
     "@ai-sdk/google": "^4.0.63",
     "@ai-sdk/groq": "^4.0.37",
+    "@ai-sdk/openai": "^4.0.60",
     "@openrouter/ai-sdk-provider": "^3.0.0",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.102.8",
+    "@virtuals-protocol/game": "^0.1.14",
     "ai": "^7.0.91",
     "clsx": "^2.1.1",
     "lucide-react": "^1.39.0",
