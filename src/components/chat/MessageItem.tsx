@@ -8,8 +8,66 @@ interface MessageItemProps {
   message: ChatMessage;
 }
 
+/**
+ * Strip raw inspector event tokens and JSON payload artifacts from assistant
+ * message content before rendering in the chat bubble.
+ *
+ * Handles all known leak patterns:
+ *   1. [EVENT:TYPE] {"key":"value"}   — SSE inline event tags
+ *   2. **** {"key":"value"}           — markdown-bold JSON artifacts (2–4 stars)
+ *   3. Lines that are purely a JSON object / array with no human text
+ *   4. Orphaned punctuation lines left after stripping (e.g. lone "**" or "***")
+ */
+function stripInspectorEvents(raw: string): string {
+  // ── Pass 1: remove [EVENT:<TYPE>] tags + optional trailing JSON payload ──
+  let text = raw.replace(
+    /\[EVENT:[A-Z_]+\]\s*(\{[\s\S]*?\}|\[[\s\S]*?\])?/g,
+    ""
+  );
+
+  // ── Pass 2: line-by-line filter ──────────────────────────────────────────
+  const lines = text.split("\n");
+  const kept: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Drop lines matching markdown-bold JSON artifacts: **{...} or ****{...}
+    if (/^\*{2,4}\s*[\[{]/.test(trimmed)) continue;
+
+    // Drop lines that are a raw standalone JSON object or array
+    // (starts with { or [ and ends with } or ], optionally with trailing punctuation)
+    if (/^[\[{][\s\S]*[\]}][,;]?\s*$/.test(trimmed)) continue;
+
+    // Drop lines that became pure markdown punctuation after stripping
+    // e.g. lone "**", "***", "---", or empty bold wrappers
+    if (/^(\*{1,4}|-{2,}|_{2,})$/.test(trimmed)) continue;
+
+    kept.push(line);
+  }
+
+  // ── Pass 3: collapse 3+ consecutive blank lines into one ────────────────
+  const collapsed = kept
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  return collapsed;
+}
+
+const EVENT_ONLY_FALLBACK =
+  "I have updated your risk profile according to your instructions.";
+
 export function MessageItem({ message }: MessageItemProps) {
   const isUser = message.role === "user";
+
+  // For assistant messages, strip inspector event tokens before rendering
+  const displayContent = isUser
+    ? message.content
+    : (() => {
+        const cleaned = stripInspectorEvents(message.content);
+        return cleaned.length > 0 ? cleaned : EVENT_ONLY_FALLBACK;
+      })();
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
@@ -29,7 +87,7 @@ export function MessageItem({ message }: MessageItemProps) {
             : "rounded-tl-sm border border-white/10 bg-[#141622]/90 text-zinc-200 backdrop-blur-sm"
         }`}
       >
-        <div className="whitespace-pre-wrap">{message.content}</div>
+        <div className="whitespace-pre-wrap">{displayContent}</div>
 
         {/* Decision Badge if present */}
         {message.decision && (
