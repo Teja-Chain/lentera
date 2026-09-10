@@ -38,7 +38,7 @@ Judges can verify the load-bearing memory pipeline in under two minutes:
 3. **Memory Write on Profile Modification**:
    - File: [`src/lib/ai/tools.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/ai/tools.ts) (Lines 77–96 in `updateRiskProfileAction`)
    - Function: `setUserRiskProfile(walletAddress, updates)`
-   - Effect: Persists updated risk rules to Sibyl Memory Cloud (`https://api.sibyllabs.org`) with authenticated session, mirrored deterministically to persistent disk storage at `.data/sibyl_memory.json`. Chit-chat is never written.
+   - Effect: Persists updated risk rules to Upstash Cloud KV (`https://mutual-herring-167129.upstash.io`) with serverless-safe REST endpoints and local runtime caching, with authenticated Sibyl session token (`tier: stake`) and telemetry heartbeat. Chit-chat is never written.
 
 4. **The Deletion Test**:
    - If you delete the `getUserRiskProfile` calls from `route.ts` and `tools.ts`, Lentera loses all risk-awareness. The execution guard ceases to function, allowing high-risk and unverified token transactions to proceed unchecked. The core function of the product completely breaks.
@@ -115,8 +115,9 @@ cp .env.example .env
 
 Set your API keys:
 - `GEMINI_API_KEYS`: Comma-separated Gemini API keys for round-robin rotation.
-- `GROQ_API_KEYS`: Groq API key for secondary fallback.
-- `SIBYL_API_KEY`: Sibyl Memory SDK API key (defaults to deterministic disk fallback at `.data/` if unpopulated).
+- `GROQ_API_KEYS`: Groq API key for secondary fallback (`qwen/qwen3.8-27b`).
+- `SIBYL_API_KEY`: Sibyl Memory SDK API key (`tier: stake`).
+- `KV_REST_API_URL` & `KV_REST_API_TOKEN`: Upstash Cloud KV credentials for cross-session persistent storage.
 - `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`: WalletConnect Project ID.
 - `RELAYER_PRIVATE_KEY`: Private key funded on Base Sepolia for server-side transaction execution.
 

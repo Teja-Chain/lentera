@@ -132,14 +132,32 @@ export async function POST(request: Request) {
             },
 
             // Called when a 429 triggers a within-provider key rotation.
-            // Emits a lightweight SSE status event so the Inspector stays accurate.
+            // Emits an Inspector event and SSE status event so the Developer Drawer stays accurate.
             onKeyRotation: (provider, keyIndex) => {
+              const rotationEvent: InspectorEvent = {
+                id: `ev-${Date.now()}-rot`,
+                type: "FALLBACK",
+                timestamp: new Date().toLocaleTimeString(),
+                title: `AI Key Rotation: ${provider.toUpperCase()} Key #${keyIndex + 1}`,
+                data: {
+                  provider,
+                  keyIndex: keyIndex + 1,
+                  action: "rotating_to_next_key_in_pool",
+                  reason: "rate_limit_or_high_demand",
+                },
+                status: "info",
+              };
+              sendEvent({
+                type: "event",
+                event: rotationEvent,
+                rawPrefix: `[EVENT:FALLBACK] ${JSON.stringify(rotationEvent.data)}`,
+              });
               sendEvent({
                 type: "provider_status",
                 provider,
                 status: "key_rotation",
                 keyIndex,
-                message: `Rate limit hit — rotating to ${provider} key #${keyIndex}`,
+                message: `Rate limit hit — rotating to ${provider} key #${keyIndex + 1}`,
               });
             },
 
@@ -149,12 +167,14 @@ export async function POST(request: Request) {
                 id: `ev-${Date.now()}-fallback`,
                 type: "FALLBACK",
                 timestamp: new Date().toLocaleTimeString(),
-                title: "AI Fallback: Switching to Groq Llama 3.3",
+                title: "AI Failover: Delegating to Groq Llama 3.3",
                 data: {
-                  provider: "groq",
-                  reason: "primary_failed",
+                  primaryProvider: "gemini",
+                  secondaryProvider: "groq",
+                  reason: "primary_exhausted_or_high_demand",
+                  statusCode: err?.statusCode ?? err?.status ?? 503,
                   primaryError: err?.message ?? String(err),
-                  primaryStatus: err?.statusCode ?? err?.status ?? "Unknown",
+                  rawErrorDetails: err?.data ?? err?.cause ?? null,
                 },
                 status: "info",
               };
@@ -173,7 +193,6 @@ export async function POST(request: Request) {
           const { profile: updatedProfile, source: updatedSource } = await getUserRiskProfile(walletAddress);
           sendEvent({ type: "done", updatedProfile, source: updatedSource });
         } catch (execError: any) {
-
           console.error("[Chat Route Error]:", execError);
 
           // Only emit error payloads if the stream is still open
@@ -182,8 +201,15 @@ export async function POST(request: Request) {
               id: `ev-${Date.now()}-err`,
               type: "DECISION",
               timestamp: new Date().toLocaleTimeString(),
-              title: "Execution Error Encountered",
-              data: { error: execError?.message || "Internal error during execution" },
+              title: "AI Provider Exhaustion (Safety Protected)",
+              data: {
+                error: execError?.message || "All AI providers temporarily busy",
+                statusCode: execError?.statusCode ?? execError?.status ?? 500,
+                code: execError?.code ?? "AI_UNAVAILABLE",
+                name: execError?.name ?? "ProviderError",
+                rawDetails: execError?.data ?? execError?.cause ?? null,
+                memorySafeguardActive: true,
+              },
               status: "blocked",
             };
 
@@ -193,11 +219,10 @@ export async function POST(request: Request) {
               rawPrefix: `[EVENT:DECISION] ${JSON.stringify(errorEvent.data)}`,
             });
 
+            // User-friendly message without raw technical exception codes
             sendEvent({
               type: "chunk",
-              text: `\n\n[Notice]: The agent encountered an issue with AI providers: ${
-                execError?.message || "Could not complete response"
-              }. However, your Sibyl Memory rules remain strictly enforced.`,
+              text: `\n\nI apologize, but our upstream AI service is temporarily experiencing high demand. Your Sibyl Memory rules and assets remain 100% protected on Base Sepolia. Please try your request again in a moment.`,
             });
 
             sendEvent({ type: "done" });

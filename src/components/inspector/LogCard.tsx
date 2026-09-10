@@ -54,9 +54,9 @@ export function LogCard({ event }: LogCardProps) {
     icon = <ArrowRightLeft size={14} className="text-cyan-400" />;
     typeLabel = "BASE SEPOLIA ROUTER";
   } else if (type === "FALLBACK") {
-    badgeClasses = "border-amber-600/35 bg-amber-950/30 text-amber-200 shadow-amber-950/20";
+    badgeClasses = "border-amber-500/40 bg-amber-950/30 text-amber-200 shadow-amber-950/30";
     icon = <AlertTriangle size={14} className="text-amber-400" />;
-    typeLabel = "FALLBACK ADAPTER";
+    typeLabel = "AI FAILOVER / RESILIENCE";
   }
 
   const handleCopy = () => {
