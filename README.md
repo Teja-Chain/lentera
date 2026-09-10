@@ -3,7 +3,7 @@
 > **Sibyl Labs Hackathon Submission**  
 > **Partner Track:** Base (+15% Partner Multiplier) | **Network:** Base Sepolia (Chain ID: 84532)  
 > **License:** MIT (OSI-Approved)  
-> 🔗 **Live Demo App:** [https://lentera-web3.vercel.app](https://lentera-web3.vercel.app) *(Ganti dengan link Vercel Anda)*  
+> 🔗 **Live Demo App:** [https://lentera-protocol.vercel.app](https://lentera-protocol.vercel.app) *(Ganti dengan link Vercel Anda)*  
 > 📹 **Demo Video (2–5 min):** [Watch on YouTube / Loom](https://youtu.be/YOUR_VIDEO_LINK) *(Ganti dengan link video Anda)*
 
 Lentera is an Autonomous Risk-Aware Portfolio Assistant operating on **Base Sepolia**. It enforces deterministic, load-bearing risk rules across distinct browser sessions using the Sibyl Memory architecture strictly scoped by wallet address.
