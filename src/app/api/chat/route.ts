@@ -130,6 +130,18 @@ export async function POST(request: Request) {
               }
             },
 
+            // Called when a 429 triggers a within-provider key rotation.
+            // Emits a lightweight SSE status event so the Inspector stays accurate.
+            onKeyRotation: (provider, keyIndex) => {
+              sendEvent({
+                type: "provider_status",
+                provider,
+                status: "key_rotation",
+                keyIndex,
+                message: `Rate limit hit — rotating to ${provider} key #${keyIndex}`,
+              });
+            },
+
             // Called just before Groq takes over — emit visible Inspector event
             onFallback: (err: any) => {
               const fallbackEvent: InspectorEvent = {

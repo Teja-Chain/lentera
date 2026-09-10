@@ -229,24 +229,37 @@ export const executeSwapAction: GameActionDefinition<ExecuteSwapParams> = {
       recipientAddress: walletAddress,
     });
 
+    const isReal = sim.isSimulated === false;
+
     inspectorEvents.push({
       id: `ev-${Date.now()}-4`,
       type: "ONCHAIN_ACTION",
       timestamp,
-      title: "Base Sepolia Transaction Dispatched",
+      title: isReal
+        ? "Base Sepolia Transaction Confirmed"
+        : "Simulated Execution (No Real Tx)",
       data: {
         network: "Base Sepolia (Chain ID 84532)",
         action: `Swap ${amountInUsdc} USDC -> ~${sim.expectedOut} ${targetUpper}`,
         txHash: sim.txHash,
-        status: "Confirmed on Base Sepolia",
+        executionMode: isReal ? "on-chain" : "simulated",
+        status: isReal ? "Confirmed on Base Sepolia" : "Simulated Execution — no BaseScan link",
+        ...(isReal && {
+          explorerUrl: `https://sepolia.basescan.org/tx/${sim.txHash}`,
+        }),
       },
       status: "approved",
-      txHash: sim.txHash,
+      // Only attach txHash to the inspector link when it is a real on-chain hash
+      txHash: isReal ? sim.txHash : undefined,
     });
+
+    const modeLabel = isReal
+      ? `Tx Hash: ${sim.txHash}`
+      : `Simulated Execution (no on-chain tx — RELAYER_PRIVATE_KEY not set or relayer failed).`;
 
     return {
       success: true,
-      message: `Swap approved and simulated on Base Sepolia. Swapped ${amountInUsdc} USDC for ${sim.expectedOut} ${targetUpper}. Tx Hash: ${sim.txHash}`,
+      message: `Swap approved on Base Sepolia. Swapped ${amountInUsdc} USDC for ${sim.expectedOut} ${targetUpper}. ${modeLabel}`,
       inspectorEvents,
       data: sim,
     };
