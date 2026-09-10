@@ -7,8 +7,13 @@ import type { LanguageModel } from "ai";
 function getPrimaryModel(): LanguageModel | null {
   const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   if (!apiKey) return null;
+
   const google = createGoogleGenerativeAI({ apiKey });
-  const modelName = process.env.GOOGLE_MODEL || "gemini-2.0-flash";
+  const modelName =
+    process.env.GEMINI_MODEL ||
+    process.env.GOOGLE_MODEL ||
+    "gemini-3.6-flash";
+
   return google(modelName);
 }
 

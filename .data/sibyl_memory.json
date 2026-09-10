@@ -1,1 +1,14 @@
-{}
+{
+  "0x07a705c3fddd3ee195b46f318b87a67cfdd0b7ec": {
+    "riskTolerance": "low",
+    "maxSlippagePercent": 1,
+    "allowedTokens": [
+      "USDC",
+      "WETH",
+      "ETH"
+    ],
+    "maxBudgetPerTxUsdc": 50,
+    "allowUnverifiedTokens": false,
+    "lastUpdated": "2026-09-10T01:53:26.418Z"
+  }
+}
