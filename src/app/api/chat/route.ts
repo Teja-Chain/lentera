@@ -1,4 +1,3 @@
-import { streamText } from "ai";
 import { getUserRiskProfile } from "@/lib/memory/sibyl";
 import { executeWithFallback } from "@/lib/ai/fallback-engine";
 import { buildSystemPrompt } from "@/lib/ai/system-prompt";
@@ -51,11 +50,39 @@ export async function POST(request: Request) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
-        // Helper to send SSE data
+        // Track whether the stream has been closed to guard against
+        // ERR_INVALID_STATE ("Controller is already closed") errors.
+        let isClosed = false;
+
+        // Helper to send SSE data — silently no-ops if stream is already closed.
+        // The try/catch around enqueue() guards against the TOCTOU race where
+        // the controller closes *between* the isClosed flag check and the actual
+        // enqueue() call, which would otherwise throw ERR_INVALID_STATE.
         const sendEvent = (eventData: any) => {
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify(eventData)}\n\n`)
-          );
+          if (isClosed) return;
+          try {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(eventData)}\n\n`)
+            );
+          } catch (e: any) {
+            if (e?.code === "ERR_INVALID_STATE") {
+              isClosed = true; // sync the flag so future calls fast-exit
+            } else {
+              throw e; // re-throw unexpected errors
+            }
+          }
+        };
+
+        // Idempotent close — safe to call multiple times
+        const closeStream = () => {
+          if (!isClosed) {
+            isClosed = true;
+            try {
+              controller.close();
+            } catch (e) {
+              // ignore already-closed errors
+            }
+          }
         };
 
         // Immediately push initial FETCH_MEMORY event
@@ -66,87 +93,116 @@ export async function POST(request: Request) {
         });
 
         try {
-          // 3. Execute with resilient fallback (Gemini -> Groq)
-          const { result: textStreamResult, activeProvider } =
-            await executeWithFallback(async (model) => {
-              return streamText({
-                model,
-                system: systemPrompt,
-                messages: [
-                  ...history.map((h: any) => ({
-                    role: h.role,
-                    content: h.content,
-                  })),
-                  { role: "user", content: message },
-                ],
-                tools,
-              });
-            });
+          // 3. Execute with streaming-aware primary → Groq fallback.
+          // executeWithFallback owns the streaming loop internally so the
+          // retry boundary is atomic: if Gemini fails at ANY point (during
+          // setup OR mid-stream), Groq is invoked without the route ever
+          // seeing the error or emitting the "[Notice]" fallback text.
+          const { activeProvider } = await executeWithFallback({
+            systemPrompt,
+            messages: [
+              ...history.map((h: any) => ({
+                role: h.role as "user" | "assistant",
+                content: h.content,
+              })),
+              { role: "user", content: message },
+            ],
+            tools,
 
-          // Inform frontend of active AI provider
-          sendEvent({
-            type: "provider_info",
-            provider: activeProvider,
-          });
-
-          // Stream chunks and capture tool calls
-          for await (const chunk of textStreamResult.fullStream) {
-            if (chunk.type === "text-delta") {
-              sendEvent({
-                type: "chunk",
-                text: (chunk as any).text ?? (chunk as any).textDelta ?? "",
-              });
-            } else if (chunk.type === "tool-result") {
-              // Extract inspector events emitted by Virtuals/AI tools
-              const toolResult = (chunk as any).output ?? (chunk as any).result;
-              if (toolResult && Array.isArray(toolResult.inspectorEvents)) {
-                for (const ev of toolResult.inspectorEvents) {
-                  sendEvent({
-                    type: "event",
-                    event: ev,
-                    rawPrefix: `[EVENT:${ev.type}] ${JSON.stringify(ev.data)}`,
-                  });
+            // Called for every streamed chunk from whichever provider wins
+            onChunk: async (chunk) => {
+              if (chunk.type === "text-delta") {
+                sendEvent({
+                  type: "chunk",
+                  text: (chunk as any).textDelta ?? (chunk as any).text ?? "",
+                });
+              } else if (chunk.type === "tool-result") {
+                const toolResult = (chunk as any).output ?? (chunk as any).result;
+                if (toolResult && Array.isArray(toolResult.inspectorEvents)) {
+                  for (const ev of toolResult.inspectorEvents) {
+                    sendEvent({
+                      type: "event",
+                      event: ev,
+                      rawPrefix: `[EVENT:${ev.type}] ${JSON.stringify(ev.data)}`,
+                    });
+                  }
                 }
               }
-            }
-          }
+            },
+
+            // Called when a 429 triggers a within-provider key rotation.
+            // Emits a lightweight SSE status event so the Inspector stays accurate.
+            onKeyRotation: (provider, keyIndex) => {
+              sendEvent({
+                type: "provider_status",
+                provider,
+                status: "key_rotation",
+                keyIndex,
+                message: `Rate limit hit — rotating to ${provider} key #${keyIndex}`,
+              });
+            },
+
+            // Called just before Groq takes over — emit visible Inspector event
+            onFallback: (err: any) => {
+              const fallbackEvent: InspectorEvent = {
+                id: `ev-${Date.now()}-fallback`,
+                type: "FALLBACK",
+                timestamp: new Date().toLocaleTimeString(),
+                title: "AI Fallback: Switching to Groq Llama 3.3",
+                data: {
+                  provider: "groq",
+                  reason: "primary_failed",
+                  primaryError: err?.message ?? String(err),
+                  primaryStatus: err?.statusCode ?? err?.status ?? "Unknown",
+                },
+                status: "info",
+              };
+              sendEvent({
+                type: "event",
+                event: fallbackEvent,
+                rawPrefix: `[EVENT:FALLBACK] ${JSON.stringify(fallbackEvent.data)}`,
+              });
+            },
+          });
+
+          // Inform frontend which provider served this response
+          sendEvent({ type: "provider_info", provider: activeProvider });
 
           // Fetch the latest profile in case tools updated it
           const { profile: updatedProfile } = await getUserRiskProfile(walletAddress);
-
-          sendEvent({
-            type: "done",
-            updatedProfile,
-          });
+          sendEvent({ type: "done", updatedProfile });
         } catch (execError: any) {
+
           console.error("[Chat Route Error]:", execError);
 
-          // Emit a fallback decision or error event
-          const errorEvent: InspectorEvent = {
-            id: `ev-${Date.now()}-err`,
-            type: "DECISION",
-            timestamp: new Date().toLocaleTimeString(),
-            title: "Execution Error Encountered",
-            data: { error: execError?.message || "Internal error during execution" },
-            status: "blocked",
-          };
+          // Only emit error payloads if the stream is still open
+          if (!isClosed) {
+            const errorEvent: InspectorEvent = {
+              id: `ev-${Date.now()}-err`,
+              type: "DECISION",
+              timestamp: new Date().toLocaleTimeString(),
+              title: "Execution Error Encountered",
+              data: { error: execError?.message || "Internal error during execution" },
+              status: "blocked",
+            };
 
-          sendEvent({
-            type: "event",
-            event: errorEvent,
-            rawPrefix: `[EVENT:DECISION] ${JSON.stringify(errorEvent.data)}`,
-          });
+            sendEvent({
+              type: "event",
+              event: errorEvent,
+              rawPrefix: `[EVENT:DECISION] ${JSON.stringify(errorEvent.data)}`,
+            });
 
-          sendEvent({
-            type: "chunk",
-            text: `\n\n[Notice]: The agent encountered an issue with AI providers: ${
-              execError?.message || "Could not complete response"
-            }. However, your Sibyl Memory rules remain strictly enforced.`,
-          });
+            sendEvent({
+              type: "chunk",
+              text: `\n\n[Notice]: The agent encountered an issue with AI providers: ${
+                execError?.message || "Could not complete response"
+              }. However, your Sibyl Memory rules remain strictly enforced.`,
+            });
 
-          sendEvent({ type: "done" });
+            sendEvent({ type: "done" });
+          }
         } finally {
-          controller.close();
+          closeStream();
         }
       },
     });

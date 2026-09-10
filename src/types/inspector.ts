@@ -2,7 +2,8 @@ export type InspectorEventType =
   | "FETCH_MEMORY"
   | "EVALUATE_RISK"
   | "DECISION"
-  | "ONCHAIN_ACTION";
+  | "ONCHAIN_ACTION"
+  | "FALLBACK";
 
 export interface InspectorEvent {
   id: string;
