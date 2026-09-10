@@ -134,10 +134,23 @@ export function ChatContainer() {
     } catch (err: any) {
       appendStreamChunk(
         assistantMsgId,
-        `\n\n[Agent Error]: Failed to reach Lentera backend (${
-          err?.message || "Unknown error"
-        }). Please check your AI API keys or connection.`
+        `\n\nI apologize, but I was unable to connect to the backend server. Your Sibyl Memory rules and assets remain fully protected. Please check your network connection and try again.`
       );
+
+      // Record full technical payload into Developer Drawer
+      addInspectorEvent({
+        id: `ev-${Date.now()}-clienterr`,
+        type: "FALLBACK",
+        timestamp: new Date().toLocaleTimeString(),
+        title: "Client Network Connection Error",
+        data: {
+          errorMessage: err?.message || "Fetch failed",
+          errorName: err?.name,
+          errorStack: err?.stack,
+          timestamp: new Date().toISOString(),
+        },
+        status: "info",
+      });
     } finally {
       setStreamingAssistantId(null);
       setLoading(false);

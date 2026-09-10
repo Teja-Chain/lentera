@@ -33,14 +33,22 @@ function isRateLimitError(err: unknown): boolean {
   if (!err) return false;
   const e = err as any;
   const status = e?.statusCode ?? e?.status ?? e?.httpStatus;
-  if (status === 429) return true;
+  if (status === 429 || status === 503 || status === 502 || status === 500) return true;
   const msg: string = (e?.message ?? e?.cause?.message ?? "").toLowerCase();
   return (
     msg.includes("resource_exhausted") ||
+    msg.includes("high demand") ||
+    msg.includes("temporarily unavailable") ||
+    msg.includes("unavailable") ||
+    msg.includes("overloaded") ||
     msg.includes("rate limit") ||
     msg.includes("rate_limit") ||
     msg.includes("quota") ||
-    msg.includes("too many requests")
+    msg.includes("too many requests") ||
+    msg.includes("retriesexceeded") ||
+    msg.includes("enotfound") ||
+    msg.includes("econnreset") ||
+    msg.includes("fetch failed")
   );
 }
 
@@ -48,7 +56,7 @@ function isRateLimitError(err: unknown): boolean {
 
 function makeGeminiModel(apiKey: string): LanguageModel {
   const google = createGoogleGenerativeAI({ apiKey });
-  const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const modelName = process.env.GEMINI_MODEL || "gemini-flash-latest";
   return google(modelName);
 }
 
@@ -105,6 +113,7 @@ async function runStream(
     system: params.systemPrompt,
     messages: params.messages,
     tools: params.tools,
+    maxRetries: 0,
     ...(extra?.maxTokens != null ? { maxTokens: extra.maxTokens } : {}),
   });
 
