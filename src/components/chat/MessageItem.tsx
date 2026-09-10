@@ -70,42 +70,42 @@ export function MessageItem({ message }: MessageItemProps) {
       })();
 
   return (
-    <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} animate-in fade-in-50 duration-200`}>
       {!isUser && (
         <div
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white shadow-md shadow-purple-500/20"
-          style={{ background: "linear-gradient(135deg, #7c6ff7, #22d3ee)" }}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white shadow-md shadow-purple-500/25 ring-1 ring-purple-400/30"
+          style={{ background: "linear-gradient(135deg, #7c6ff7 0%, #22d3ee 100%)" }}
         >
-          <Sparkles size={16} />
+          <Sparkles size={15} />
         </div>
       )}
 
       <div
-        className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+        className={`max-w-[88%] sm:max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed transition-all ${
           isUser
-            ? "rounded-tr-sm bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm"
-            : "rounded-tl-sm border border-white/10 bg-[#141622]/90 text-zinc-200 backdrop-blur-sm"
+            ? "rounded-tr-sm bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-600 text-white shadow-md shadow-purple-950/30 border border-purple-400/20"
+            : "rounded-tl-sm border border-purple-500/15 bg-[#121422]/95 text-zinc-200 backdrop-blur-md shadow-md shadow-purple-950/20"
         }`}
       >
         <div className="whitespace-pre-wrap">{displayContent}</div>
 
         {/* Decision Badge if present */}
         {message.decision && (
-          <div className="mt-2.5 pt-2 border-t border-white/10 flex flex-wrap items-center gap-2">
+          <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-wrap items-center gap-2">
             {message.decision === "approved" ? (
-              <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-300">
-                <CheckCircle2 size={12} />
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-300 shadow-sm shadow-emerald-950/30">
+                <CheckCircle2 size={13} className="text-emerald-400" />
                 <span>Risk Guard: Approved</span>
               </span>
             ) : message.decision === "blocked" ? (
-              <span className="inline-flex items-center gap-1 rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-xs font-semibold text-rose-300">
-                <ShieldAlert size={12} />
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-300 shadow-sm shadow-rose-950/30">
+                <ShieldAlert size={13} className="text-rose-400" />
                 <span>Risk Guard: Blocked</span>
               </span>
             ) : null}
 
             {message.reasoning && (
-              <span className="text-xs text-zinc-400 italic">
+              <span className="text-xs text-zinc-400 font-mono italic">
                 {message.reasoning}
               </span>
             )}
@@ -114,13 +114,13 @@ export function MessageItem({ message }: MessageItemProps) {
 
         {/* Transaction Badge if present */}
         {message.txHash && (
-          <div className="mt-2 flex items-center gap-2">
-            <span className="text-xs text-zinc-400">On-Chain Tx:</span>
+          <div className="mt-2.5 flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
+            <span className="text-[11px] text-zinc-400 font-medium">On-Chain Tx:</span>
             <TransactionBadge txHash={message.txHash} />
           </div>
         )}
 
-        <div className="mt-1 text-[10px] text-zinc-400/60 text-right">
+        <div className="mt-1.5 text-[10px] font-mono text-zinc-400/60 text-right">
           {new Date(message.timestamp).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -129,8 +129,8 @@ export function MessageItem({ message }: MessageItemProps) {
       </div>
 
       {isUser && (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-600/30 border border-purple-500/30 text-purple-300">
-          <User size={16} />
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-600/25 border border-purple-500/40 text-purple-200 shadow-sm shadow-purple-950/30">
+          <User size={15} />
         </div>
       )}
     </div>

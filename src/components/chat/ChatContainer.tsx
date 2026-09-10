@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
-import { Send, Sparkles, Shield, AlertCircle } from "lucide-react";
+import { Send, Sparkles, Shield, AlertCircle, Zap, ShieldCheck, ShieldAlert, ArrowRightLeft, CornerDownLeft } from "lucide-react";
 import { useAgentStore } from "@/store/useAgentStore";
 import { MessageItem } from "./MessageItem";
 import { DemoPresets } from "./DemoPresets";
@@ -21,11 +21,16 @@ export function ChatContainer() {
   const setActiveAiProvider = useAgentStore((s) => s.setActiveAiProvider);
 
   const [input, setInput] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Auto scroll to bottom of chat
+  // Auto scroll to bottom of chat only when messages exist
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > 0 && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [messages, isLoading]);
 
   // Hydrate persistent Sibyl Memory whenever wallet address changes
@@ -142,9 +147,9 @@ export function ChatContainer() {
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-[#0a0b12]">
       {/* Messages Scroll Area */}
-      <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
+      <div ref={scrollContainerRef} className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-thumb-zinc-800">
         {messages.length === 0 ? (
-          <div className="mx-auto flex max-w-lg flex-col items-center justify-center pt-10 text-center">
+          <div className="mx-auto flex max-w-lg flex-col items-center justify-center pt-6 sm:pt-8 text-center">
             <div
               className="flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-xl shadow-purple-500/20"
               style={{ background: "linear-gradient(135deg, #7c6ff7, #22d3ee)" }}
@@ -179,48 +184,122 @@ export function ChatContainer() {
         )}
 
         {isLoading && (
-          <div className="flex items-center gap-2 text-xs text-zinc-400">
+          <div className="flex items-center gap-2.5 rounded-xl border border-purple-500/20 bg-purple-500/5 p-3 text-xs text-zinc-300 w-fit">
             <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-purple-500/20 text-purple-400">
-              <Sparkles size={12} className="animate-spin" />
+              <Sparkles size={13} className="animate-spin text-cyan-400" />
             </div>
-            <span>Lentera is evaluating memory and executing risk guards...</span>
+            <div className="flex items-center gap-1.5">
+              <span>Lentera is evaluating Sibyl Memory & running risk guards...</span>
+              <span className="flex h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+            </div>
           </div>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Bar */}
-      <div className="border-t border-white/10 bg-[#0d0f19]/90 p-4 backdrop-blur-md">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-          className="mx-auto flex max-w-4xl items-center gap-2 rounded-2xl border border-white/10 bg-[#141624] px-4 py-2.5 shadow-inner focus-within:border-purple-500/50"
-        >
-          <Shield size={16} className="text-zinc-500 shrink-0" />
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={!isConnected || isLoading}
-            placeholder={
-              isConnected
-                ? "Instruct Lentera (e.g. 'Set max slippage to 1%' or 'Swap 50 USDC to WETH')..."
-                : "Connect your wallet first to begin..."
-            }
-            className="flex-1 bg-transparent text-xs sm:text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none disabled:opacity-40"
-          />
+      {/* Persistent Quick Action Pills Dock & Input Bar */}
+      <div className="border-t border-white/10 bg-[#0c0e18]/90 px-3 sm:px-6 py-3 backdrop-blur-md">
+        <div className="mx-auto max-w-4xl space-y-2.5">
+          {/* Quick Action Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
+            <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500 shrink-0 mr-1">
+              <Zap size={11} className="text-cyan-400" /> Quick Actions:
+            </span>
 
-          <button
-            type="submit"
-            disabled={!isConnected || isLoading || !input.trim()}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-500 text-white shadow-md shadow-purple-500/20 transition-all hover:opacity-90 active:scale-95 disabled:opacity-30"
+            <button
+              type="button"
+              disabled={!isConnected || isLoading}
+              onClick={() =>
+                handleSendMessage(
+                  "Please set my risk profile to strict low risk: maximum 1% slippage, strictly no unverified or meme tokens, and maximum 50 USDC budget per transaction."
+                )
+              }
+              className="flex items-center gap-1.5 shrink-0 rounded-lg border border-purple-500/20 bg-purple-500/10 px-2.5 py-1 font-medium text-purple-300 hover:border-purple-500/50 hover:bg-purple-500/20 active:scale-95 transition-all disabled:opacity-40"
+              title="Session 1: Set Strict Low Risk"
+            >
+              <ShieldCheck size={12} className="text-purple-400" />
+              <span>S1: Strict Low Risk</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={!isConnected || isLoading}
+              onClick={() =>
+                handleSendMessage(
+                  "Attempt to swap 50 USDC to unverified MEME token with 2% slippage tolerance."
+                )
+              }
+              className="flex items-center gap-1.5 shrink-0 rounded-lg border border-rose-500/20 bg-rose-500/10 px-2.5 py-1 font-medium text-rose-300 hover:border-rose-500/50 hover:bg-rose-500/20 active:scale-95 transition-all disabled:opacity-40"
+              title="Session 2 Proof: Attempt MEME Swap (Guard Test)"
+            >
+              <ShieldAlert size={12} className="text-rose-400" />
+              <span>S2: Attempt MEME Swap</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={!isConnected || isLoading}
+              onClick={() =>
+                handleSendMessage(
+                  "Please execute a safe swap of 5 USDC to WETH on Base Sepolia."
+                )
+              }
+              className="flex items-center gap-1.5 shrink-0 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 font-medium text-emerald-300 hover:border-emerald-500/50 hover:bg-emerald-500/20 active:scale-95 transition-all disabled:opacity-40"
+              title="Swap USDC -> WETH on Base Sepolia"
+            >
+              <ArrowRightLeft size={12} className="text-emerald-400" />
+              <span>Swap USDC → WETH</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={!isConnected || isLoading}
+              onClick={() =>
+                handleSendMessage("What are my current active risk rules stored in Sibyl Memory?")
+              }
+              className="flex items-center gap-1.5 shrink-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-medium text-zinc-300 hover:border-white/20 hover:bg-white/10 active:scale-95 transition-all disabled:opacity-40"
+              title="Inspect Current Rules"
+            >
+              <Sparkles size={12} className="text-cyan-400" />
+              <span>Inspect Rules</span>
+            </button>
+          </div>
+
+          {/* Form Input */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
+            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-[#131522] px-4 py-2.5 shadow-inner transition-all focus-within:border-purple-500/60 focus-within:shadow-[0_0_25px_rgba(168,85,247,0.15)]"
           >
-            <Send size={14} />
-          </button>
-        </form>
+            <Shield size={16} className="text-zinc-500 shrink-0" />
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              disabled={!isConnected || isLoading}
+              placeholder={
+                isConnected
+                  ? "Instruct Lentera (e.g. 'Set max slippage to 1%' or 'Swap 50 USDC to WETH')..."
+                  : "Connect your wallet above to begin..."
+              }
+              className="flex-1 bg-transparent text-xs sm:text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none disabled:opacity-40"
+            />
+
+            <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] text-zinc-500 font-mono">
+              <CornerDownLeft size={10} /> Enter
+            </span>
+
+            <button
+              type="submit"
+              disabled={!isConnected || isLoading || !input.trim()}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-500 text-white shadow-md shadow-purple-500/20 transition-all hover:opacity-95 active:scale-95 disabled:opacity-30"
+              title="Send Prompt"
+            >
+              <Send size={13} />
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
