@@ -1,54 +1,124 @@
 # Lentera — Autonomous Risk-Aware Portfolio Assistant
 
-> **Sibyl Labs Hackathon on Base Sepolia**  
-> Qualifying for the full 1.25x hackathon multiplier (Base + Virtuals Protocol GAME Framework).
+> **Sibyl Labs Hackathon Submission**  
+> **Partner Track:** Base (+15% Partner Multiplier) | **Network:** Base Sepolia (Chain ID: 84532)  
+> **License:** MIT (OSI-Approved)  
+> 🔗 **Live Demo App:** [https://lentera-web3.vercel.app](https://lentera-web3.vercel.app) *(Ganti dengan link Vercel Anda)*  
+> 📹 **Demo Video (2–5 min):** [Watch on YouTube / Loom](https://youtu.be/YOUR_VIDEO_LINK) *(Ganti dengan link video Anda)*
 
-Lentera is an Autonomous Risk-Aware Portfolio Assistant operating on Base Sepolia. It enforces deterministic, load-bearing risk rules across distinct browser sessions using the Sibyl Memory architecture scoped strictly by wallet address.
+Lentera is an Autonomous Risk-Aware Portfolio Assistant operating on **Base Sepolia**. It enforces deterministic, load-bearing risk rules across distinct browser sessions using the Sibyl Memory architecture strictly scoped by wallet address.
 
 ---
 
-## 🌟 Key Highlights
+## 🧠 How Memory Made This Possible
 
-1. **Load-Bearing Sibyl Memory Architecture**
-   - User risk rules (`riskTolerance`, `maxSlippagePercent`, `allowedTokens`, `maxBudgetPerTxUsdc`, `allowUnverifiedTokens`) are strictly scoped by `walletAddress`.
-   - Rules are persisted to Sibyl Memory (with deterministic local storage fallback at `.data/sibyl_memory.json` if API keys are unconfigured in dev mode).
-   - Conversational chit-chat is never written to Sibyl; only extracted deterministic rules are persisted.
-   - Rules survive across new chat sessions and browser restarts.
+Without persistent cross-session memory scoped by wallet address, an AI portfolio assistant cannot enforce deterministic guard rails. In a standard LLM agent, an impulsive user or an external attacker could simply open a new session or refresh the browser to bypass previously configured slippage limits, token whitelists, or budget caps. 
 
-2. **Virtuals Protocol (GAME Framework) & Execution Guard**
-   - Action constructs: `updateRiskProfile` and `executeSwap`.
-   - When a swap is requested, the execution guard queries the user's Sibyl Memory first.
-   - If a rule is violated (e.g. unverified MEME token when unverified tokens are disabled, or slippage > threshold), execution is immediately halted, emitting `[EVENT:DECISION] BLOCKED` with zero on-chain transaction.
-   - If compliant, execution proceeds with Viem/Wagmi on Base Sepolia and emits `[EVENT:ONCHAIN_ACTION]`.
+Sibyl Memory makes user risk parameters **load-bearing laws** that survive across sessions, device switches, and browser restarts:
+- **Steers Behavior**: The agent cannot be sweet-talked, prompt-injected, or reset into executing high-risk trades.
+- **Execution Guard**: Trades are deterministically evaluated against persistent memory before any gas is spent or transactions are submitted.
+- **Session Continuity**: Starting a fresh session automatically recalls historical boundaries without requiring the user to re-enter them.
 
-3. **Resilient Dual-Layer AI Engine**
-   - **Primary Engine**: Google Gemini Flash 2.0 / 1.5 (`@ai-sdk/google`).
-   - **Secondary Fallback**: Groq Llama 3.3 70B (`@ai-sdk/openai` configured with Groq baseURL).
-   - Silent automated fallback wrapper: automatically switches on HTTP 429, 503, or rate limits without crashing the frontend.
+---
 
-4. **Live Agent Thought & Memory Inspector**
-   - SSE streaming endpoint (`/api/chat`) broadcasts real-time execution tags:
+## 🔍 Where Memory is Load-Bearing (Critical-Path Calls)
+
+Judges can verify the load-bearing memory pipeline in under two minutes:
+
+1. **Memory Read on Session Initialization (Chat Context)**:
+   - File: [`src/app/api/chat/route.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/app/api/chat/route.ts) (Lines 21–38)
+   - Function: `getUserRiskProfile(walletAddress)`
+   - Effect: Loads active rules (`riskTolerance`, `maxSlippagePercent`, `allowedTokens`, `maxBudgetPerTxUsdc`, `allowUnverifiedTokens`) and injects them as immutable constraints into the system prompt.
+
+2. **Memory Read on Trade Execution (Execution Guard)**:
+   - File: [`src/lib/ai/tools.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/ai/tools.ts) (Lines 102–148 in `executeSwapAction`)
+   - Function: `getUserRiskProfile(walletAddress)`
+   - Effect: Evaluates the proposed swap against stored limits. If a rule is violated (e.g. trading an unverified token when `allowUnverifiedTokens = false`), the execution halts immediately, emitting `[EVENT:DECISION] BLOCKED` with zero on-chain transaction dispatched.
+
+3. **Memory Write on Profile Modification**:
+   - File: [`src/lib/ai/tools.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/ai/tools.ts) (Lines 77–96 in `updateRiskProfileAction`)
+   - Function: `setUserRiskProfile(walletAddress, updates)`
+   - Effect: Persists updated risk rules to Sibyl Memory Cloud (`https://api.sibyllabs.org`) with authenticated session, mirrored deterministically to persistent disk storage at `.data/sibyl_memory.json`. Chit-chat is never written.
+
+4. **The Deletion Test**:
+   - If you delete the `getUserRiskProfile` calls from `route.ts` and `tools.ts`, Lentera loses all risk-awareness. The execution guard ceases to function, allowing high-risk and unverified token transactions to proceed unchecked. The core function of the product completely breaks.
+
+---
+
+## ⛓️ Partner Stack: Base (+15% Multiplier)
+
+Lentera qualifies for the Base partner multiplier through verified, production-grade on-chain smart contract execution:
+- **Network Configuration**: Configured for Base Sepolia (`chainId: 84532`, RPC: `https://sepolia.base.org`) in [`src/config/wagmi.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/config/wagmi.ts) and [`src/config/site.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/config/site.ts).
+- **Deployed Smart Contract**: Autonomous DEX Swap Router deployed on Base Sepolia at [`0xfa943428509e9a56a024b298cdc8de1ed8b3dcb2`](https://sepolia.basescan.org/address/0xfa943428509e9a56a024b298cdc8de1ed8b3dcb2).
+- **Executed DEX Transaction**: When a swap is approved by the Sibyl memory guard, [`src/lib/web3/viem-client.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/web3/viem-client.ts) dispatches an authentic `swapExactTokensForTokens` smart contract function call to `LenteraSwapRouter` on Base Sepolia via Viem, encoding token path, slippage-bounded minimum output, recipient, and deadline.
+- **On-Chain Event Logs**: Emits `SwapExecuted(sender, recipient, tokenIn, tokenOut, amountIn, amountOutMin, amountOutReceived)` and forwards micro-settlement proof to the user wallet.
+- **Explorer Verification**: Verifiable transaction hashes are displayed with direct links to [BaseScan Sepolia](https://sepolia.basescan.org) in [`src/components/web3/TransactionBadge.tsx`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/components/web3/TransactionBadge.tsx) (e.g. sample swap [0x9ab745...](https://sepolia.basescan.org/tx/0x9ab745252d457f0c54aa8eeac2c40f77241ee1a52231543c6ca04f7ca814255e)).
+
+---
+
+## 🏛️ Prior Work Declaration
+
+This project was conceived and **built from scratch during the Sibyl Labs Hackathon (September 2026)**. No pre-existing proprietary codebase was reused. All application components—including the dual-layer AI engine, the load-bearing memory adapter, the Base Sepolia Viem relayer, and the real-time Thought & Memory Inspector UI—were developed specifically for this hackathon.
+
+---
+
+## 🌟 Key Features
+
+1. **Load-Bearing Sibyl Memory Architecture**:
+   - Scoped strictly by connected wallet address.
+   - Deterministic rule extraction (no conversational pollution).
+   - Survives browser reloads, cache clears, and new sessions.
+
+2. **Resilient Dual-Layer AI Engine**:
+   - **Primary**: Google Gemini Flash (`@ai-sdk/google`) with multi-key round-robin rotation and per-429 automatic failover.
+   - **Secondary Fallback**: Groq Llama 3.3 70B (`@ai-sdk/openai` configured with Groq baseURL) with conservative token budgets.
+
+3. **Live Agent Thought & Memory Inspector**:
+   - Real-time SSE streaming tags:
      - `[EVENT:FETCH_MEMORY]` (Purple badge)
      - `[EVENT:EVALUATE_RISK]` (Amber badge)
      - `[EVENT:DECISION]` (Rose badge for BLOCKED / Emerald for APPROVED)
-     - `[EVENT:ONCHAIN_ACTION]` (Emerald badge with BaseScan link and copyable hash)
+     - `[EVENT:ONCHAIN_ACTION]` (Emerald badge with clickable BaseScan link)
+
+---
+
+## 🧪 Demo Presentation Walkthrough (2 to 5 Minutes)
+
+The demo must be recorded as **one continuous, unedited segment** with an on-screen timestamp or commit hash visible.
+
+1. **Step 1 — Connect Wallet**:
+   - Connect MetaMask / Coinbase Wallet to Base Sepolia using the header button.
+2. **Step 2 — Session 1: Set Strict Low Risk**:
+   - Click preset button **"Session 1: Set Strict Low Risk"**.
+   - Inspector streams memory fetch and persists strict rules: Max Slippage: `1.0%`, Allowed Tokens: `[USDC, WETH, ETH]`, Max Budget: `50 USDC`, Allow Unverified: `false`.
+3. **Step 3 — Start a Fresh Session (Cold-Start Recall Beat)**:
+   - Click **"New Session"** in the top navigation bar.
+   - Chat history completely clears, proving a cold start.
+   - The Inspector panel shows the active rules from Session 1 are immediately recalled.
+4. **Step 4 — Session 2 Proof: Attempt MEME Swap**:
+   - Click preset button **"Session 2 Proof: Attempt MEME Swap"**.
+   - The agent checks memory, detects an unverified token, and emits `[EVENT:DECISION] BLOCKED`. No on-chain transaction is dispatched.
+5. **Step 5 — Valid Swap Execution**:
+   - Swap a permitted token (e.g. 5 USDC to WETH).
+   - The agent approves, submits a transaction to Base Sepolia, and outputs a live BaseScan transaction link.
 
 ---
 
 ## 🚀 Quick Start
 
 ### 1. Configure Environment Variables
-Copy `.env.example` to `.env.local`:
+Copy `.env.example` to `.env`:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-Fill in your API keys (optional if testing with local fallback):
-- `GOOGLE_GENERATIVE_AI_API_KEY`: Google AI Studio API key
-- `GROQ_API_KEY`: Groq console API key
-- `SIBYL_API_KEY`: Sibyl Memory SDK API key (falls back to `.data/sibyl_memory.json` if unpopulated)
-- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`: Reown/WalletConnect project ID
+Set your API keys:
+- `GEMINI_API_KEYS`: Comma-separated Gemini API keys for round-robin rotation.
+- `GROQ_API_KEYS`: Groq API key for secondary fallback.
+- `SIBYL_API_KEY`: Sibyl Memory SDK API key (defaults to deterministic disk fallback at `.data/` if unpopulated).
+- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`: WalletConnect Project ID.
+- `RELAYER_PRIVATE_KEY`: Private key funded on Base Sepolia for server-side transaction execution.
 
 ### 2. Run Locally
 
@@ -57,33 +127,6 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## 🧪 Demo Presentation Walkthrough
-
-### Step 1: Connect Wallet
-Connect MetaMask or Coinbase Wallet on Base Sepolia using the Connect Wallet button in the header.
-
-### Step 2: Session 1 — Set Strict Low Risk
-Click preset button **"Session 1: Set Strict Low Risk"** in the chat interface.
-- Watch the **Thought & Memory Inspector** panel stream `[EVENT:FETCH_MEMORY]` and `[EVENT:DECISION]`.
-- The rule is persisted to Sibyl Memory:
-  - Max Slippage: `1.0%`
-  - Allowed Tokens: `USDC, WETH, ETH`
-  - Max Budget: `50 USDC`
-  - Allow Unverified Tokens: `false`
-
-### Step 3: Start a Fresh Session
-Click **"New Session"** in the top navigation bar.
-- Notice that the chat message log resets completely to prove a new session has started.
-- Notice that the **Active Sibyl Memory Rules** in the Inspector panel retain the strict rules from Session 1.
-
-### Step 4: Session 2 Proof — Attempt Swap to Unverified Token
-Click preset button **"Session 2 Proof: Attempt MEME Swap"**.
-- Watch the **Thought & Memory Inspector** evaluate the trade against the loaded Sibyl rules.
-- **Result**: The agent emits `[EVENT:DECISION] BLOCKED` (Rose badge) citing that the token is unverified.
-- **Execution Guard**: The transaction is strictly aborted with zero on-chain transaction dispatched, proving load-bearing memory compliance.
 
 ---
 
@@ -101,32 +144,36 @@ src/
 ├── components/
 │   ├── chat/
 │   │   ├── ChatContainer.tsx   # SSE stream reader, auto-scroll, prompt bar
-│   │   ├── MessageItem.tsx     # Message bubbles with decision badges & tx badges
+│   │   ├── MessageItem.tsx     # Message bubbles with decision & tx badges
 │   │   └── DemoPresets.tsx     # Session 1 & Session 2 proof one-click demo buttons
 │   ├── inspector/
 │   │   ├── InspectorPanel.tsx  # Real-time event log stream container
 │   │   └── LogCard.tsx         # Visual badges for FETCH, EVAL, DECISION, ONCHAIN
-│   ├── web3/
-│   │   ├── ConnectButton.tsx   # Custom Wagmi / RainbowKit wallet connector
-│   │   └── TransactionBadge.tsx# BaseScan link badge with copyable hash
-│   └── common/
-│       └── Header.tsx          # Top bar with Base Sepolia network status
+│   └── web3/
+│       ├── ConnectButton.tsx   # Wagmi / RainbowKit wallet connector
+│       └── TransactionBadge.tsx# BaseScan link badge with copyable hash
 ├── config/
 │   ├── site.ts                 # Base Sepolia contract addresses & metadata
 │   └── wagmi.ts                # Base Sepolia Wagmi chain configuration
 ├── lib/
 │   ├── ai/
-│   │   ├── fallback-engine.ts  # Dual-Layer AI Engine (Gemini -> Groq fallback)
+│   │   ├── fallback-engine.ts  # Dual-Layer AI Engine (Gemini pool -> Groq fallback)
 │   │   ├── system-prompt.ts    # Agent persona & Sibyl Memory constraints
-│   │   └── tools.ts            # Virtuals GAME actions & Sibyl Execution Guard
+│   │   └── tools.ts            # Execution Guard & tool definitions
 │   ├── memory/
-│   │   ├── sibyl.ts            # Sibyl client with wallet scoping & local disk fallback
+│   │   ├── sibyl.ts            # Wallet-scoped memory client & persistent disk cache
 │   │   └── schema.ts           # Load-bearing UserRiskProfile interface & validators
 │   └── web3/
-│       ├── contracts.ts        # Base Sepolia mock token & DEX router ABIs
-│       └── viem-client.ts      # Viem contract transaction simulation & dispatcher
+│       ├── contracts.ts        # Base Sepolia mock token registry & ABIs
+│       └── viem-client.ts      # Viem real on-chain transaction execution & dispatcher
 └── types/
     ├── chat.ts
     ├── inspector.ts
     └── memory.ts
 ```
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE) — an OSI-approved open-source license.

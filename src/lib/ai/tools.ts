@@ -13,9 +13,9 @@ export interface ToolExecutionResult {
 }
 
 /**
- * Virtuals Protocol GAME Action Definition Interface
+ * Agent Action Definition Interface
  */
-export interface GameActionDefinition<T = any> {
+export interface AgentActionDefinition<T = any> {
   name: string;
   description: string;
   parameters: z.ZodType<T>;
@@ -36,7 +36,7 @@ export type UpdateRiskProfileParams = z.infer<typeof UpdateRiskProfileParamsSche
  * Action 1: updateRiskProfile
  * Writes strictly typed rules to Sibyl Memory
  */
-export const updateRiskProfileAction: GameActionDefinition<UpdateRiskProfileParams> = {
+export const updateRiskProfileAction: AgentActionDefinition<UpdateRiskProfileParams> = {
   name: "updateRiskProfile",
   description:
     "Update the user's load-bearing risk parameters in Sibyl Memory (riskTolerance, maxSlippagePercent, allowedTokens, maxBudgetPerTxUsdc, allowUnverifiedTokens).",
@@ -46,14 +46,15 @@ export const updateRiskProfileAction: GameActionDefinition<UpdateRiskProfilePara
     const timestamp = new Date().toLocaleTimeString();
 
     // 1. Fetch current memory
-    const { profile: oldProfile } = await getUserRiskProfile(walletAddress);
+    const { profile: oldProfile, source: fetchSource } = await getUserRiskProfile(walletAddress);
     inspectorEvents.push({
       id: `ev-${Date.now()}-1`,
       type: "FETCH_MEMORY",
       timestamp,
-      title: "Sibyl Memory Retrieved",
+      title: `Sibyl Memory Retrieved (${fetchSource})`,
       data: {
         wallet: walletAddress,
+        storageAdapter: fetchSource,
         currentRisk: oldProfile.riskTolerance,
         maxSlippage: `${oldProfile.maxSlippagePercent}%`,
         maxBudget: `${oldProfile.maxBudgetPerTxUsdc} USDC`,
@@ -100,7 +101,7 @@ export const ExecuteSwapParamsSchema = z.object({
 
 export type ExecuteSwapParams = z.infer<typeof ExecuteSwapParamsSchema>;
 
-export const executeSwapAction: GameActionDefinition<ExecuteSwapParams> = {
+export const executeSwapAction: AgentActionDefinition<ExecuteSwapParams> = {
   name: "executeSwap",
   description:
     "Execute or simulate a swap of USDC to a target token on Base Sepolia. Strictly guarded by Sibyl Memory.",
@@ -111,14 +112,15 @@ export const executeSwapAction: GameActionDefinition<ExecuteSwapParams> = {
     const timestamp = new Date().toLocaleTimeString();
 
     // STEP 1: Query Sibyl Memory for this user's persistent risk rules
-    const { profile } = await getUserRiskProfile(walletAddress);
+    const { profile, source: guardSource } = await getUserRiskProfile(walletAddress);
     inspectorEvents.push({
       id: `ev-${Date.now()}-1`,
       type: "FETCH_MEMORY",
       timestamp,
-      title: "Querying Sibyl Memory Execution Guard",
+      title: `Querying Sibyl Memory Execution Guard (${guardSource})`,
       data: {
         wallet: walletAddress,
+        storageAdapter: guardSource,
         storedMaxSlippage: `${profile.maxSlippagePercent}%`,
         storedMaxBudget: `${profile.maxBudgetPerTxUsdc} USDC`,
         storedAllowedTokens: profile.allowedTokens,
@@ -236,13 +238,15 @@ export const executeSwapAction: GameActionDefinition<ExecuteSwapParams> = {
       type: "ONCHAIN_ACTION",
       timestamp,
       title: isReal
-        ? "Base Sepolia Transaction Confirmed"
+        ? "Base Sepolia DEX Contract Executed"
         : "Simulated Execution (No Real Tx)",
       data: {
         network: "Base Sepolia (Chain ID 84532)",
+        contract: `LenteraSwapRouter (${sim.routerAddress})`,
+        function: "swapExactTokensForTokens",
         action: `Swap ${amountInUsdc} USDC -> ~${sim.expectedOut} ${targetUpper}`,
         txHash: sim.txHash,
-        executionMode: isReal ? "on-chain" : "simulated",
+        executionMode: isReal ? "on-chain smart contract" : "simulated",
         status: isReal ? "Confirmed on Base Sepolia" : "Simulated Execution — no BaseScan link",
         ...(isReal && {
           explorerUrl: `https://sepolia.basescan.org/tx/${sim.txHash}`,
@@ -254,12 +258,12 @@ export const executeSwapAction: GameActionDefinition<ExecuteSwapParams> = {
     });
 
     const modeLabel = isReal
-      ? `Tx Hash: ${sim.txHash}`
+      ? `Contract: LenteraSwapRouter (${sim.routerAddress}) | Tx Hash: ${sim.txHash}`
       : `Simulated Execution (no on-chain tx — RELAYER_PRIVATE_KEY not set or relayer failed).`;
 
     return {
       success: true,
-      message: `Swap approved on Base Sepolia. Swapped ${amountInUsdc} USDC for ${sim.expectedOut} ${targetUpper}. ${modeLabel}`,
+      message: `Swap executed on Base Sepolia via LenteraSwapRouter (swapExactTokensForTokens). Swapped ${amountInUsdc} USDC for ${sim.expectedOut} ${targetUpper}. ${modeLabel}`,
       inspectorEvents,
       data: sim,
     };

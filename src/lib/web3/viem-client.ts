@@ -4,10 +4,13 @@ import {
   createWalletClient,
   http,
   parseEther,
+  parseUnits,
+  isAddress,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
 import { siteConfig } from "@/config/site";
+import { LENTERA_ROUTER_ABI, MOCK_TOKENS } from "@/lib/web3/contracts";
 
 // ─── Clients ──────────────────────────────────────────────────────────────────
 
@@ -36,20 +39,32 @@ export interface SimulationResult {
   error?: string;
 }
 
-// ─── Real On-Chain Relayer ────────────────────────────────────────────────────
+// ─── Real On-Chain Relayer (Smart Contract DEX Interaction) ───────────────────
 
 /**
- * Sends a minimal ETH transfer (0.00001 ETH) from the relayer account to
- * `recipientAddress` on Base Sepolia, waits for the receipt, and returns the
- * real transaction hash.
+ * Executes a real DEX swap call (`swapExactTokensForTokens`) on the deployed
+ * LenteraSwapRouter smart contract on Base Sepolia.
  *
- * This lightweight "proof-of-execution" transfer is used as a stand-in for the
- * actual swap while the testnet router is not yet deployed.  The amount is
- * intentionally tiny so the relayer balance is not meaningfully depleted.
- *
- * Throws if the key is invalid or if the transaction reverts / times out.
+ * Emits `SwapExecuted` on-chain, records the exact token path, amountIn, and slippage-bounded
+ * amountOutMin, and attaches a micro-ETH proof-of-execution forward to the recipient wallet.
  */
-async function executeRelayerTx(recipientAddress: string): Promise<`0x${string}`> {
+async function executeRelayerSwap(params: {
+  recipientAddress: string;
+  tokenInSymbol: string;
+  tokenOutSymbol: string;
+  amountInUsdc: number;
+  expectedOut: string;
+  slippageTolerancePercent: number;
+}): Promise<`0x${string}`> {
+  const {
+    recipientAddress,
+    tokenInSymbol,
+    tokenOutSymbol,
+    amountInUsdc,
+    expectedOut,
+    slippageTolerancePercent,
+  } = params;
+
   const rawKey = process.env.RELAYER_PRIVATE_KEY!;
   // Normalise: viem requires a 0x-prefixed 32-byte hex string
   const hexKey = (
@@ -64,11 +79,43 @@ async function executeRelayerTx(recipientAddress: string): Promise<`0x${string}`
     transport: http(RPC_URL),
   });
 
-  // viem 2.x: account must be passed explicitly even when set on the client
-  const hash = await walletClient.sendTransaction({
+  // Resolve token addresses
+  const inMeta = MOCK_TOKENS[tokenInSymbol as keyof typeof MOCK_TOKENS] as { address: string; decimals: number } | undefined;
+  const outMeta = MOCK_TOKENS[tokenOutSymbol as keyof typeof MOCK_TOKENS] as { address: string; decimals: number } | undefined;
+
+  const tokenInAddress = (inMeta?.address || siteConfig.contracts.usdc) as `0x${string}`;
+  const tokenOutAddress = (outMeta?.address || siteConfig.contracts.weth) as `0x${string}`;
+
+  const inDecimals = inMeta?.decimals ?? 6;
+  const outDecimals = outMeta?.decimals ?? 18;
+
+  // Calculate slippage bounded minimum output
+  const expectedOutNum = parseFloat(expectedOut);
+  const minOutNum = Math.max(0, expectedOutNum * (1 - slippageTolerancePercent / 100));
+
+  const amountInBig = parseUnits(amountInUsdc.toString(), inDecimals);
+  const amountOutMinBig = parseUnits(minOutNum.toFixed(6), outDecimals);
+
+  const targetRecipient = isAddress(recipientAddress)
+    ? (recipientAddress as `0x${string}`)
+    : account.address;
+
+  const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200); // 20 min deadline
+
+  // Execute smart contract swap on LenteraSwapRouter
+  const hash = await walletClient.writeContract({
     account,
-    to: recipientAddress as `0x${string}`,
-    value: parseEther("0.00001"),
+    address: siteConfig.contracts.router as `0x${string}`,
+    abi: LENTERA_ROUTER_ABI,
+    functionName: "swapExactTokensForTokens",
+    args: [
+      amountInBig,
+      amountOutMinBig,
+      [tokenInAddress, tokenOutAddress],
+      targetRecipient,
+      deadline,
+    ],
+    value: parseEther("0.00001"), // micro-execution confirmation forwarded to recipient
   });
 
   // Wait for at least 1 confirmation before returning
@@ -80,12 +127,12 @@ async function executeRelayerTx(recipientAddress: string): Promise<`0x${string}`
 // ─── Public simulateSwap ──────────────────────────────────────────────────────
 
 /**
- * Execute (or simulate) a swap on Base Sepolia.
+ * Execute a swap on Base Sepolia via real smart contract invocation or fallback simulation.
  *
  * ### Execution modes
  * | `RELAYER_PRIVATE_KEY` | Mode |
  * |---|---|
- * | Present & tx succeeds | Real on-chain ETH transfer → real `txHash` (`isSimulated: false`) |
+ * | Present & tx succeeds | Real on-chain DEX router contract call → real `txHash` (`isSimulated: false`) |
  * | Missing OR tx fails   | Mock receipt with `isSimulated: true` (no BaseScan link) |
  */
 export async function simulateSwap(params: {
@@ -112,7 +159,7 @@ export async function simulateSwap(params: {
     amountIn: amountInUsdc,
     expectedOut,
     slippageTolerancePercent,
-    routerAddress: siteConfig.contracts.mockRouter,
+    routerAddress: siteConfig.contracts.router,
     gasEstimateGwei: "0.15",
   };
 
@@ -120,11 +167,18 @@ export async function simulateSwap(params: {
   const relayerKey = process.env.RELAYER_PRIVATE_KEY;
   if (relayerKey) {
     try {
-      const txHash = await executeRelayerTx(recipientAddress);
+      const txHash = await executeRelayerSwap({
+        recipientAddress,
+        tokenInSymbol: "USDC",
+        tokenOutSymbol: targetUpper,
+        amountInUsdc,
+        expectedOut,
+        slippageTolerancePercent,
+      });
       return { ...base, txHash, isSimulated: false };
     } catch (execErr: any) {
       console.warn(
-        "[Relayer] On-chain execution failed — falling back to simulation.",
+        "[Relayer] On-chain smart contract execution failed — falling back to simulation.",
         execErr?.message
       );
       // Fall through to simulated path
@@ -140,4 +194,5 @@ export async function simulateSwap(params: {
 
   return { ...base, txHash: mockHash, isSimulated: true };
 }
+
 

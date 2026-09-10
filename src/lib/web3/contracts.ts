@@ -46,7 +46,11 @@ export const ERC20_ABI = parseAbi([
   "event Approval(address indexed owner, address indexed spender, uint256 value)",
 ]);
 
-export const MOCK_ROUTER_ABI = parseAbi([
-  "function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to, uint256 deadline) returns (uint256[] memory amounts)",
+export const LENTERA_ROUTER_ABI = parseAbi([
+  "function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to, uint256 deadline) payable returns (uint256[] memory amounts)",
   "function getAmountsOut(uint256 amountIn, address[] calldata path) view returns (uint256[] memory amounts)",
+  "event SwapExecuted(address indexed sender, address indexed recipient, address tokenIn, address tokenOut, uint256 amountIn, uint256 amountOutMin, uint256 amountOutReceived)",
 ]);
+
+export const MOCK_ROUTER_ABI = LENTERA_ROUTER_ABI;
+
