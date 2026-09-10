@@ -9,6 +9,18 @@
     ],
     "maxBudgetPerTxUsdc": 50,
     "allowUnverifiedTokens": false,
-    "lastUpdated": "2026-09-10T01:52:45.193Z"
+    "lastUpdated": "2026-09-09T10:16:09.467Z"
+  },
+  "0x07a705c3fddd3ee195b46f318b87a67cfdd0b7ec": {
+    "riskTolerance": "low",
+    "maxSlippagePercent": 1,
+    "allowedTokens": [
+      "USDC",
+      "WETH",
+      "ETH"
+    ],
+    "maxBudgetPerTxUsdc": 50,
+    "allowUnverifiedTokens": false,
+    "lastUpdated": "2026-09-10T02:16:48.563Z"
   }
 }
