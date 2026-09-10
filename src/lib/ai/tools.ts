@@ -46,14 +46,15 @@ export const updateRiskProfileAction: AgentActionDefinition<UpdateRiskProfilePar
     const timestamp = new Date().toLocaleTimeString();
 
     // 1. Fetch current memory
-    const { profile: oldProfile } = await getUserRiskProfile(walletAddress);
+    const { profile: oldProfile, source: fetchSource } = await getUserRiskProfile(walletAddress);
     inspectorEvents.push({
       id: `ev-${Date.now()}-1`,
       type: "FETCH_MEMORY",
       timestamp,
-      title: "Sibyl Memory Retrieved",
+      title: `Sibyl Memory Retrieved (${fetchSource})`,
       data: {
         wallet: walletAddress,
+        storageAdapter: fetchSource,
         currentRisk: oldProfile.riskTolerance,
         maxSlippage: `${oldProfile.maxSlippagePercent}%`,
         maxBudget: `${oldProfile.maxBudgetPerTxUsdc} USDC`,
@@ -111,14 +112,15 @@ export const executeSwapAction: AgentActionDefinition<ExecuteSwapParams> = {
     const timestamp = new Date().toLocaleTimeString();
 
     // STEP 1: Query Sibyl Memory for this user's persistent risk rules
-    const { profile } = await getUserRiskProfile(walletAddress);
+    const { profile, source: guardSource } = await getUserRiskProfile(walletAddress);
     inspectorEvents.push({
       id: `ev-${Date.now()}-1`,
       type: "FETCH_MEMORY",
       timestamp,
-      title: "Querying Sibyl Memory Execution Guard",
+      title: `Querying Sibyl Memory Execution Guard (${guardSource})`,
       data: {
         wallet: walletAddress,
+        storageAdapter: guardSource,
         storedMaxSlippage: `${profile.maxSlippagePercent}%`,
         storedMaxBudget: `${profile.maxBudgetPerTxUsdc} USDC`,
         storedAllowedTokens: profile.allowedTokens,

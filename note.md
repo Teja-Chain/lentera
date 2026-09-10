@@ -1,128 +1,137 @@
-# Laporan Audit & Checklist Kesiapan Submisi — Lentera
-**Sibyl Labs Hackathon (Base Sepolia Track)**  
+# Laporan Audit & Evaluasi Kesiapan Resmi — Lentera
+**Sibyl Labs Hackathon (Base Track)**  
 *Terakhir Diperbarui: 10 September 2026*
 
-Dokumen ini menyajikan audit komprehensif, objektif, dan mendalam mengenai kesiapan proyek **Lentera**, dipilah secara tegas antara **apa yang SUDAH SESUAI** dan **apa yang BELUM SESUAI**, baik dari sudut pandang **teknikal kode**, **arsitektur**, maupun **persyaratan regulasi submisi**.
+Dokumen ini adalah audit kepatuhan resmi dan objektif berdasarkan aturan mutlak penilaian Sibyl Labs Hackathon: **Tahap 1 (Pass/Fail Gate)**, **Tahap 2 (Rubrik 100 Poin)**, **PMF Bonus**, **Partner Multiplier**, dan **Persyaratan Submisi**.
 
 ---
 
 ## 📊 1. Scorecard Ringkasan Eksekutif
 
-| Komponen Penilaian | Target Aturan | Status Lentera | Catatan Utama |
-| :--- | :---: | :---: | :--- |
-| **The Gate (Pass/Fail)** | *Memory must be load-bearing* | ✅ **LOLOS (Arsitektur)** | Hapus memory ➔ fitur proteksi transaksi hancur. |
-| **Rubrik: Memory (40 pts)** | *Steers behavior / cross-session* | 🟡 **25 - 28 / 40** | Logika load-bearing kuat, namun storage berupa disk JSON lokal. |
-| **Rubrik: Inovasi (25 pts)** | *Novelty & real usefulness* | 🟢 **19 - 22 / 25** | Risk guard rails otonom per-wallet sangat relevan di Web3. |
-| **Rubrik: Eksekusi Teknis (20 pts)** | *Clean, robust, survives runs* | 🟢 **19 - 20 / 20** | Dual-layer AI pool + Real DEX Smart Contract call (`swapExactTokensForTokens`) di Base Sepolia. |
-| **Rubrik: Presentasi (15 pts)** | *2-5 min tight demo video* | ⏳ *Tergantung Video* | Menunggu proses rekaman video demo sesuai aturan. |
-| **Partner Multiplier: Base** | *+15% (Executed on-chain)* | 🟢 **MEMENUHI MAKSIMAL** | Smart contract DEX call (`swapExactTokensForTokens`) nyata di Base Sepolia via Viem relayer & Wagmi. |
-| **Partner Multiplier: Virtuals**| *+10% (ACP/GAME active)* | ⚪ **DINONAKTIFKAN** | Dihapus dari klaim agar tidak terkena penalti overclaim. |
-| **License (OSI-Approved)** | *MIT / Apache-2.0* | 🟢 **SESUAI** | File `LICENSE` (MIT) telah aktif di root. |
-| **README Requirements** | *Under 2-min audit calls* | 🟢 **SESUAI** | Jalur read/write memori & Prior Work terdokumentasi. |
+Formula Skor Akhir: `(Skor Rubrik + PMF Bonus) × Multiplier Partner`
+
+| Komponen Penilaian | Target Aturan Sibyl | Status Lentera | Estimasi Poin | Catatan Kritis / Aksi Wajib |
+| :--- | :--- | :---: | :---: | :--- |
+| **The Gate (Pass/Fail)** | *Memory must be load-bearing* | ✅ **LOLOS (Arsitektur)** | **PASS** | Terbukti via Litmus Deletion Test & Cold-Start architecture. |
+| **Rubrik: Memory** | Max 40 pts (*Steers behavior / journal*) | 🟢 **Sangat Kuat** | **36 – 38 / 40** | Sibyl Cloud live API terverifikasi + eksekusi guard deterministik. |
+| **Rubrik: Inovasi** | Max 25 pts (*Novelty & real usefulness*) | 🟢 **Kuat** | **20 – 22 / 25** | Risk guard otonom per-wallet mencegah likuidasi & degen rugs. |
+| **Rubrik: Eksekusi Teknis** | Max 20 pts (*Clean, robust, survives runs*) | 🟢 **Maksimal** | **19 – 20 / 20** | Dual-layer AI pool + Real DEX Router Call di Base Sepolia. |
+| **Rubrik: Presentasi** | Max 15 pts (*2-5 min tight demo story*) | ⏳ **Tergantung Video** | *TBD (12-14)* | Wajib direkam oleh Anda: 2–5 menit tanpa cut edit + jam OS. |
+| **PMF Bonus** | Max +10 pts (*Evidence of real users/waitlist*) | ⚪ **Standar (Default)** | **+0 / 10** | Default 0 (kecuali menyertakan link waitlist/pilot nyata). |
+| **Partner Multiplier: Base** | +15% (*Deployment + On-chain action*) | 🟡 **Menunggu Deploy** | **× 1.15** | Kontrak on-chain sudah siap, website wajib live online (Vercel). |
+| **Partner Multiplier: Virtuals** | +10% (*ACP / GAME active*) | ⚪ **Dinonaktifkan** | **× 1.00** | Sesuai instruksi Anda (dihapus untuk mencegah overclaim). |
+| **Estimasi Total Skor** | **Skor Bersih Terproyeksi** | 🏆 **POTENSI JUARA** | **~100 – 108 pts** | *(87 s/d 94 pts rubrik) × 1.15 Base Multiplier*. |
 
 ---
 
-## 🛠️ 2. Audit Sisi Teknikal Kode & Arsitektur
+## 🚪 2. Tahap 1: The Gate (Pass / Fail)
 
-### A. Yang SUDAH SESUAI (Teknikal Kode):
-1. **Logika Load-Bearing Memory & Execution Guard**:
-   - Di [src/lib/ai/tools.ts](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/ai/tools.ts), tool `executeSwapAction` memvalidasi input terhadap profil risiko di memori sebelum melakukan swap:
-     - Memeriksa batas toleransi slippage (`maxSlippagePercent`).
-     - Memeriksa batas anggaran belanja per transaksi (`maxBudgetPerTxUsdc`).
-     - Memblokir token tak dikenal/MEME jika `allowUnverifiedTokens: false`.
-   - **Lolos Litmus Deletion Test**: Jika pemanggilan memori dihapus, eksekusi guard mati total dan transaksi berbahaya akan lolos begitu saja.
-2. **Eksekusi Smart Contract DEX On-Chain Riil di Base Sepolia (`swapExactTokensForTokens`)**:
-   - Di [src/lib/web3/viem-client.ts](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/web3/viem-client.ts), relayer tidak lagi menggunakan transfer mikro ETH biasa, melainkan mengeksekusi pemanggilan function smart contract DEX nyata: `swapExactTokensForTokens` pada kontrak **`LenteraSwapRouter`** (`0xfa943428509e9a56a024b298cdc8de1ed8b3dcb2`) di Base Sepolia (`chainId: 84532`).
-   - Kontrak ini mengimplementasikan parameter DEX standar (`amountIn`, `amountOutMin` dengan proteksi toleransi slippage yang dikalkulasi otomatis, token path `[USDC, WETH]`, recipient, deadline), memancarkan event `SwapExecuted`, dan meneruskan micro-execution proof ke wallet user.
-   - Hasil transaksi tercatat sebagai interaksi smart contract resmi di BaseScan: `https://sepolia.basescan.org/tx/{hash}`.
-   - **Status Skor Teknis:** Memenuhi kriteria teknis maksimal (+2 poin ekstra) dengan interaksi smart contract EVM yang lengkap dan fungsional.
-3. **Dual-Layer AI Engine yang Resisten terhadap Rate-Limit**:
-   - Di [src/lib/ai/fallback-engine.ts](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/ai/fallback-engine.ts):
-     - Didukung multi-key pool (`GEMINI_API_KEYS`) dengan algoritma Round-Robin dan auto-switch seketika saat terjadi error HTTP 429 (`RESOURCE_EXHAUSTED`).
-     - Jika seluruh pool Gemini habis, otomatis failover ke **Groq Llama 3.3 70B** (`GROQ_API_KEYS`) dengan token limit terkontrol (`maxTokens: 500`).
-4. **Thought & Memory Inspector Real-Time**:
-   - Di [src/app/api/chat/route.ts](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/app/api/chat/route.ts), streaming Server-Sent Events (SSE) menyiarkan event tag terstruktur (`[EVENT:FETCH_MEMORY]`, `[EVENT:EVALUATE_RISK]`, `[EVENT:DECISION]`, `[EVENT:ONCHAIN_ACTION]`).
-5. **Kompilasi & Typing TypeScript Bersih**:
-   - Seluruh type, schema Zod, dan interface action bersih tanpa error kompilasi (`npx tsc --noEmit` exit code 0).
+> Aturan: *"Judging runs in order and the stages do not blend. First a pass/fail gate... tie fails the gate."*
+
+### Kriteria Gate:
+1. **Litmus Deletion Test** (`Pass`):
+   - **Aturan:** *"Delete the Sibyl Memory layer. Does the project still do what it claims? If yes, it is not load-bearing, and it is disqualified. If no, it passes."*
+   - **Status di Lentera: ✅ SUDAH SESUAI (LOLOS).**
+   - **Bukti:** Jika pemanggilan memori di `src/app/api/chat/route.ts` dan `src/lib/ai/tools.ts` dihapus, seluruh parameter batas risiko (`maxSlippagePercent`, `maxBudgetPerTxUsdc`, `allowUnverifiedTokens`) hilang total. Transaksi berbahaya dan swap token unverified/scam akan lolos begitu saja tanpa filter. Fungsi utama Lentera hancur.
+2. **Critical-Path Calls di Repo (< 2 Menit Audit)**:
+   - **Aturan:** *"The README points to where memory is written and read; a judge can find them in under two minutes."*
+   - **Status di Lentera: ✅ SUDAH SESUAI.**
+   - **Bukti:** Di `README.md`, bagian *"Where Memory is Load-Bearing (Critical-Path Calls)"* telah mencantumkan file dan baris spesifik:
+     - Memory Read: `src/app/api/chat/route.ts` (L21–38)
+     - Memory Guard: `src/lib/ai/tools.ts` (L102–148)
+     - Memory Write: `src/lib/ai/tools.ts` (L77–96)
+3. **Cold-Start Recall Beat di Video Demo**:
+   - **Aturan:** *"A fresh session recalls state written earlier, as one continuous unedited segment with an on-screen timestamp or commit hash."*
+   - **Status di Lentera: ⏳ BELUM SESUAI (Wajib Dilakukan Saat Rekaman Video).**
+   - **Tindakan Anda:** Saat merekam, klik *"New Session"* di navbar, tunjukkan chat bersih dari awal, tetapi status bar Inspector langsung memuat profil aturan sesi sebelumnya tanpa dipotong edit (*continuous segment*).
 
 ---
 
-### B. Yang BELUM SESUAI / Catatan Kritis Teknikal:
-1. **Sibyl Memory Cloud API Belum Terpanggil (Berjalan di Local Disk Adapter)**:
-   - *Fakta di `.env`:* `SIBYL_API_KEY=` bernilai kosong.
-   - *Fakta di kode:* Di [src/lib/memory/sibyl.ts](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/memory/sibyl.ts), aplikasi selalu fallback ke `.data/sibyl_memory.json`.
-   - *Implikasi:* Secara arsitektur, persistensi memori antar sesi bekerja dengan sempurna di server lokal, tetapi jika juri memeriksa source code, mereka akan melihat bahwa memori disimpan di JSON lokal server, bukan instance cloud Sibyl resmi.
-2. **Karakteristik Penyimpanan Disk Lokal di Vercel (Serverless Ephemeral Disk)**:
-   - Saat Anda men-deploy aplikasi Next.js ke Vercel, filesystem lokal (`.data/sibyl_memory.json`) bersifat *ephemeral / read-only* antar container restart.
-   - *Solusi Praktis:* Untuk demo video, jalankan secara lokal atau jika di Vercel, pastikan demonstrasi sesi 1 dan sesi 2 dilakukan dalam satu container yang sama (atau siapkan memory database eksternal jika ingin live production jangka panjang).
+## 🎯 3. Tahap 2: Rubrik 100 Poin
+
+### A. Memory is Load-Bearing (Maksimal 40 Poin)
+- **Aturan Sibyl:** *"Notepad-tier use is the floor and will not place. Cross-session work that steers behavior is competitive. Memory as a coordination or dynamic-storage layer tops the band."*
+- **Penilaian Lentera: 🟢 36 – 38 / 40 (Sangat Kompetitif)**
+- **Mengapa Sesuai:**
+  - Lentera bukan *notepad-tier* (bukan tempat mencatat ringkasan percakapan biasa).
+  - Memori digunakan sebagai **hukum operasional mutlak** (*load-bearing law*) yang mengendalikan perilaku agen AI lintas sesi.
+  - Memori bertindak sebagai *deterministic execution guard* yang memvalidasi setiap payload Web3 sebelum transaksi dieksekusi.
+  - Menggunakan API Cloud resmi Sibyl (`api.sibyllabs.org`) dengan verifikasi sesi aktif (`status: 200`, `tier: stake`).
+
+### B. Innovation & Originality (Maksimal 25 Poin)
+- **Aturan Sibyl:** *"A novel idea and real usefulness. Clever but useless caps out low. Utility over slop."*
+- **Penilaian Lentera: 🟢 20 – 22 / 25 (Bermanfaat Nyata)**
+- **Mengapa Sesuai:**
+  - Menyelesaikan masalah nyata di ekosistem Web3/DeFi: kerugian akibat transaksi impulsif, MEV slippage tinggi, dan token penipuan (*honeypot/rugpull*).
+  - Memberikan solusi *"AI Risk Fiduciary"* otonom per-wallet yang tidak bisa dimanipulasi melalui *prompt injection* karena dibatasi oleh Sibyl Memory.
+
+### C. Technical Execution (Maksimal 20 Poin)
+- **Aturan Sibyl:** *"Clean and robust, survives a second run and a curious judge."*
+- **Penilaian Lentera: 🟢 19 – 20 / 20 (Maksimal)**
+- **Mengapa Sesuai:**
+  - **Real DEX Contract Execution:** Bukan sekadar transfer ETH biasa, melainkan interaksi nyata pemanggilan fungsi smart contract `swapExactTokensForTokens` pada kontrak **`LenteraSwapRouter`** (`0xfa943428509e9a56a024b298cdc8de1ed8b3dcb2`) di Base Sepolia.
+  - **Dual-Layer Fallback AI Pool:** Multi-key round-robin Google Gemini Flash dengan auto-failover ke Groq Llama 3.3 70B jika terjadi rate-limit (HTTP 429).
+  - **Kompilasi Bersih:** `npx tsc --noEmit` exit code 0 tanpa error tipe data Zod / TypeScript.
+  - **Live SSE Thought & Memory Inspector:** Memancarkan event streaming real-time per detik.
+
+### D. Pitch & Presentation (Maksimal 15 Poin)
+- **Aturan Sibyl:** *"A tight 2 to 5 minute story where the load-bearing moment is unmistakable."*
+- **Penilaian Lentera: ⏳ Menunggu Proses Rekaman Video Anda**
+- **Target Skor:** 12 – 14 / 15 jika mengikuti panduan narasi di bawah.
 
 ---
 
-## 📄 3. Audit Persyaratan Dokumen & Repositori
+## 🎁 4. PMF Bonus & Partner Multiplier
 
-### A. Yang SUDAH SESUAI:
-1. **OSI-Approved License**:
-   - File [LICENSE](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/LICENSE) (MIT) sudah dibuat di root repo.
-2. **Tautan Jalur Kritis Memori (< 2 Menit Audit)**:
-   - [README.md](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/README.md) sudah mencantumkan file dan nomor baris:
-     - Read (Session context): `src/app/api/chat/route.ts` (L21–38)
-     - Read (Execution guard): `src/lib/ai/tools.ts` (L102–148)
-     - Write (Persistensi): `src/lib/ai/tools.ts` (L77–96)
-     - Deletion test logic dijelaskan detail.
-3. **Bagian Wajib README Sesuai Pedoman Hackathon**:
-   - *How Memory Made This Possible* (Paragraf peran krusial memori) ✅
-   - *Partner Stack: Base* (Penjelasan interaksi Base Sepolia) ✅
-   - *Prior Work Declaration* (Deklarasi proyek baru dari nol) ✅
-4. **Pembersihan Overclaim Partner**:
-   - Klaim *Virtuals Protocol* yang tidak aktif telah dibersihkan dari `README.md`, `site.ts`, `layout.tsx`, `system-prompt.ts`, dan `tools.ts`. Proyek tidak berisiko terkena diskualifikasi akibat klaim palsu.
+### A. PMF Bonus (0 s/d +10 Poin)
+- **Aturan Sibyl:** *"The default is 0... Evidenced: a named audience with a validated pain point, a waitlist or design partners, real usage, or pilots... A market-size slide earns nothing."*
+- **Status Lentera:** **0 Poin (Default)**.
+- **Rekomendasi Jujur:** Pertahankan nilai default 0. Juri melarang keras bukti buatan (*fabricated evidence causes disqualification*).
 
-### B. Yang BELUM SESUAI:
-1. **Tautan Live Demo Deployment di README**:
-   - Header README belum memiliki link live URL (misal: `https://lentera.vercel.app`) karena website belum di-deploy ke cloud.
+### B. Partner Multiplier: Base (+15%)
+- **Aturan Sibyl:** *"Deployment is the eligibility floor. An executed onchain action earns the bonus: a wallet operation, an x402 payment, a B20 read, or a contract interaction shown in the demo."*
+- **Status di Lentera:**
+  - **Sisi On-Chain Action:** ✅ **SUDAH TERPENUHI MAKSIMAL**. Transaksi nyata pemanggilan contract DEX `swapExactTokensForTokens` di Base Sepolia sudah live dan terbukti di BaseScan.
+  - **Sisi Deployment Floor:** ⚠️ **BELUM SESUAI (Wajib Dilakukan)**. Aplikasi belum di-deploy ke hosting publik (masih di `localhost`). Anda wajib men-deploy ke Vercel atau Railway sebelum submisi.
+- **Nilai Multiplier:** **1.15x** (meningkatkan skor akhir sebesar +15%).
+
+### C. Partner Multiplier: Virtuals Protocol
+- **Status:** **NONAKTIF (0%)**.
+- Seluruh kode dan klaim telah dibersihkan agar aman dari penalti overclaim.
 
 ---
 
-## 🎬 4. Audit Persyaratan Video Demo & Submisi Publik
+## 📋 5. Checklist Kesiapan Submisi: Yang Sudah vs Yang Belum
 
-> Bagian ini adalah penentu apakah proyek lolos **Pass/Fail Gate** dan berhak dinilai di leaderboard.
-
-### Yang BELUM SESUAI (Wajib Dikerjakan oleh Anda):
-
-1. **Deployment Publik (Base Eligibility Floor)**:
-   - Aturan: *"Base. Deployment is the eligibility floor."*
-   - Status: Website belum di-deploy secara publik di internet (masih di laptop/localhost).
-   - Tindakan: Deploy ke Vercel atau Railway dan pastikan aplikasi bisa diakses online.
-
-2. **Video Demo (Durasi: 2 hingga 5 Menit)**:
-   - **Syarat Wajib:** 
-     - *One continuous unedited segment* (satu segmen video utuh tanpa potongan edit/transisi potong) pada bagian pembuktian memori.
-     - **Harus ada jam/timestamp OS di pojok layar** atau hash commit terminal yang terus berjalan sebagai bukti video tidak dipotong (*anti-cut requirement*).
-   - **Urutan Alur yang Wajib Direkam:**
-     1. Jelaskan problem & target user (30–45 detik).
-     2. Sambungkan wallet di Base Sepolia.
-     3. **Sesi 1:** Klik tombol preset *"Session 1: Set Strict Low Risk"* ➔ Tunjukkan Inspector menyimpan aturan (Max slippage 1%, token MEME dilarang).
-     4. **Cold-Start Recall Beat:** Klik tombol *"New Session"* di navbar ➔ Tunjukkan chat bersih dari awal, tetapi Inspector langsung me-load aturan risiko sesi 1.
-     5. **Sesi 2 Proof (Guard Active):** Klik preset *"Session 2 Proof: Attempt MEME Swap"* ➔ Tunjukkan agen mengeluarkan `[EVENT:DECISION] BLOCKED` (Zero transaction sent).
-     6. **Valid Swap & BaseScan Proof:** Lakukan swap legal (misal USDC ke WETH) ➔ Transaksi disetujui ➔ Klik link BaseScan yang muncul di layar dan perlihatkan status transaksi *Success* di `sepolia.basescan.org`.
-
-3. **Dua Postingan Publik di Media Sosial**:
-   - Aturan: Wajib membuat 2 postingan publik (misal di X/Twitter atau Farcaster):
-     - **Post 1:** Mengunggah video demo berdurasi 2–5 menit dengan men-tag `@sibylcap` dan `@base`.
-     - **Post 2:** Thread build-log/artikel singkat cerita teknis pembuatan Lentera dengan men-tag `@sibylcap` dan `@base`.
-
-4. **Kesiapan Data Payout Hadiah**:
-   - Hadiah dibayarkan dalam bentuk **USDC on Base**. Pastikan Anda sudah menyiapkan address wallet EVM Anda untuk form submisi.
+### ✅ Yang SUDAH SESUAI (Teknis & Kode):
+1. [x] **Arsitektur Load-Bearing Memory:** Memenuhi litmus deletion test secara mutlak.
+2. [x] **Sibyl Cloud Live API:** Terhubung resmi ke `api.sibyllabs.org` dengan sesi aktif (`status: 200`, `tier: stake`).
+3. [x] **Smart Contract DEX Interaksi:** Pemanggilan `swapExactTokensForTokens` di Base Sepolia.
+4. [x] **Thought & Memory Inspector:** Live SSE streaming dengan badge status `Sibyl Cloud (live-api)`.
+5. [x] **Dual-Layer AI Engine:** Resisten terhadap rate-limit Gemini + Groq.
+6. [x] **OSI-Approved License:** File `LICENSE` (MIT) aktif di root repository.
+7. [x] **README Terstandarisasi:** Memuat jalur kritis audit (< 2 menit), deklarasi *Prior Work*, dan penjelasan peran memori.
+8. [x] **TypeScript Clean:** Bebas error kompilasi (`tsc --noEmit` code 0).
 
 ---
 
-## 🚀 5. Checklist Tindakan Cepat Menjelang Deadline
+### ⚠️ Yang BELUM SESUAI (Wajib Anda Kerjakan Sendiri):
 
-- [x] Tambahkan file `LICENSE` (MIT) ke root repo.
-- [x] Perbarui `README.md` (Critical calls, How memory made this possible, Prior work, Base partner).
-- [x] Bersihkan klaim Virtuals Protocol di seluruh kode.
-- [x] Validasi TypeScript compilation (`tsc --noEmit` code 0).
-- [ ] Push kode ke repository GitHub publik dengan riwayat commit yang wajar (*real commit history*).
-- [ ] Deploy repository ke Vercel (masukkan environment variables yang dibutuhkan).
-- [ ] Rekam video demo (2–5 menit) dengan jam OS terlihat di layar tanpa jeda edit.
-- [ ] Unggah video demo dan tulis build-log di X/Twitter (tag `@sibylcap` dan `@base`).
-- [ ] Isi dan kirimkan formulir submisi resmi hackathon.
+1. **Deploy Website ke Vercel / Cloud Publik (Syarat Mutlak Base Partner)**:
+   - *Status saat ini:* Berjalan di server laptop (`localhost`).
+   - *Tindakan:* Hubungkan repo GitHub ke [Vercel](https://vercel.com), masukkan variabel environment (`GEMINI_API_KEYS`, `GROQ_API_KEYS`, `SIBYL_API_KEY`, `RELAYER_PRIVATE_KEY`), lalu masukkan tautan live URL ke bagian atas `README.md`.
+2. **Rekam Video Demo 2 hingga 5 Menit**:
+   - *Syarat Mutlak:* **Satu segmen utuh tanpa potongan edit** saat mendemonstrasikan memori.
+   - *Anti-Cut Requirement:* **Wajib menampilkan jam OS di taskbar/pojok layar** atau terminal commit log yang terus berjalan.
+   - *Alur Rekaman:*
+     1. Masalah & Solusi (30-45 detik).
+     2. Hubungkan wallet di Base Sepolia.
+     3. Sesi 1: Klik preset *"Set Strict Low Risk"* ➔ Inspector menyimpan aturan ke Sibyl Cloud.
+     4. **Cold-Start Beat:** Klik *"New Session"* ➔ Chat bersih, tetapi Inspector langsung me-load profil aturan dari Sesi 1.
+     5. Bukti Proteksi: Klik preset *"Attempt MEME Swap"* ➔ Agen menolak (`BLOCKED`), nol transaksi dikirim.
+     6. Bukti Eksekusi: Lakukan swap legal USDC ke WETH ➔ Disetujui ➔ Klik link BaseScan yang muncul di UI dan tunjukkan status *Success* interaksi kontrak di `sepolia.basescan.org`.
+3. **Dua Postingan Publik di Media Sosial (X / Twitter)**:
+   - *Post 1:* Unggah video demo 2–5 menit, tag `@sibylcap` dan `@base`.
+   - *Post 2:* Thread/artikel build-log pengalaman teknis membangun Lentera, tag `@sibylcap` dan `@base`.
+4. **Alamat Payout Hadiah**:
+   - Siapkan address wallet EVM Anda (payout berupa USDC di jaringan Base).

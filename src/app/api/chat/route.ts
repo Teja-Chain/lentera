@@ -30,6 +30,7 @@ export async function POST(request: Request) {
       title: `Sibyl Memory Loaded (${memorySource})`,
       data: {
         wallet: walletAddress,
+        storageAdapter: memorySource,
         riskTolerance: currentRiskProfile.riskTolerance,
         maxSlippagePercent: currentRiskProfile.maxSlippagePercent,
         allowedTokens: currentRiskProfile.allowedTokens,
@@ -169,8 +170,8 @@ export async function POST(request: Request) {
           sendEvent({ type: "provider_info", provider: activeProvider });
 
           // Fetch the latest profile in case tools updated it
-          const { profile: updatedProfile } = await getUserRiskProfile(walletAddress);
-          sendEvent({ type: "done", updatedProfile });
+          const { profile: updatedProfile, source: updatedSource } = await getUserRiskProfile(walletAddress);
+          sendEvent({ type: "done", updatedProfile, source: updatedSource });
         } catch (execError: any) {
 
           console.error("[Chat Route Error]:", execError);

@@ -39,7 +39,7 @@ export function ChatContainer() {
       .then((res) => res.json())
       .then((data) => {
         if (data.profile) {
-          setRiskProfile(data.profile);
+          setRiskProfile(data.profile, data.source);
         }
       })
       .catch((err) => console.warn("[Memory Hydration Failed]:", err));
@@ -117,7 +117,7 @@ export function ChatContainer() {
                 setActiveAiProvider(data.provider);
               } else if (data.type === "done") {
                 if (data.updatedProfile) {
-                  setRiskProfile(data.updatedProfile);
+                  setRiskProfile(data.updatedProfile, data.source);
                 }
               }
             } catch (jsonErr) {

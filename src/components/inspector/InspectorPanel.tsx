@@ -9,6 +9,7 @@ export function InspectorPanel() {
   const inspectorEvents = useAgentStore((s) => s.inspectorEvents);
   const clearInspectorEvents = useAgentStore((s) => s.clearInspectorEvents);
   const riskProfile = useAgentStore((s) => s.riskProfile);
+  const memorySource = useAgentStore((s) => s.memorySource);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,9 +52,22 @@ export function InspectorPanel() {
             <Database size={13} />
             <span>Active Sibyl Memory Rules</span>
           </div>
-          <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] text-purple-300 font-mono">
-            Load-Bearing
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] text-purple-300 font-mono">
+              Load-Bearing
+            </span>
+            {memorySource && (
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-mono border ${
+                  memorySource.toLowerCase().includes("cloud") || memorySource.toLowerCase().includes("live")
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                    : "border-amber-500/30 bg-amber-500/10 text-amber-300"
+                }`}
+              >
+                {memorySource}
+              </span>
+            )}
+          </div>
         </div>
 
         {riskProfile ? (

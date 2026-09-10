@@ -8,6 +8,7 @@ interface AgentState {
   messages: ChatMessage[];
   streamingAssistantId: string | null;  // ID of the currently streaming assistant msg
   riskProfile: UserRiskProfile | null;
+  memorySource: string | null;
   inspectorEvents: InspectorEvent[];
   isLoading: boolean;
   activeAiProvider: "gemini" | "groq" | null;
@@ -16,7 +17,7 @@ interface AgentState {
   addMessage: (m: ChatMessage) => void;
   setStreamingAssistantId: (id: string | null) => void;
   appendStreamChunkToAssistant: (id: string, textChunk: string) => void;
-  setRiskProfile: (p: UserRiskProfile | null) => void;
+  setRiskProfile: (p: UserRiskProfile | null, source?: string | null) => void;
   addInspectorEvent: (e: InspectorEvent) => void;
   clearInspectorEvents: () => void;
   setLoading: (v: boolean) => void;
@@ -29,6 +30,7 @@ export const useAgentStore = create<AgentState>((set) => ({
   messages: [],
   streamingAssistantId: null,
   riskProfile: null,
+  memorySource: null,
   inspectorEvents: [],
   isLoading: false,
   activeAiProvider: null,
@@ -49,7 +51,11 @@ export const useAgentStore = create<AgentState>((set) => ({
       ),
     })),
 
-  setRiskProfile: (p) => set({ riskProfile: p }),
+  setRiskProfile: (p, source) =>
+    set((s) => ({
+      riskProfile: p,
+      memorySource: source !== undefined ? source : s.memorySource,
+    })),
 
   addInspectorEvent: (e) =>
     set((s) => ({

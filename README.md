@@ -36,7 +36,7 @@ Judges can verify the load-bearing memory pipeline in under two minutes:
 3. **Memory Write on Profile Modification**:
    - File: [`src/lib/ai/tools.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/ai/tools.ts) (Lines 77–96 in `updateRiskProfileAction`)
    - Function: `setUserRiskProfile(walletAddress, updates)`
-   - Effect: Persists updated risk rules to Sibyl Memory (mirrored deterministically to persistent disk storage at `.data/sibyl_memory.json`). Chit-chat is never written.
+   - Effect: Persists updated risk rules to Sibyl Memory Cloud (`https://api.sibyllabs.org`) with authenticated session, mirrored deterministically to persistent disk storage at `.data/sibyl_memory.json`. Chit-chat is never written.
 
 4. **The Deletion Test**:
    - If you delete the `getUserRiskProfile` calls from `route.ts` and `tools.ts`, Lentera loses all risk-awareness. The execution guard ceases to function, allowing high-risk and unverified token transactions to proceed unchecked. The core function of the product completely breaks.
