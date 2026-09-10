@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Lentera — Autonomous Risk-Aware Portfolio Assistant",
   description:
-    "Autonomous Risk-Aware Portfolio Assistant for Sibyl Labs Hackathon on Base Sepolia. Load-bearing memory and Virtuals Protocol execution guard.",
+    "Autonomous Risk-Aware Portfolio Assistant for Sibyl Labs Hackathon on Base Sepolia with load-bearing memory execution guard.",
 };
 
 export default function RootLayout({

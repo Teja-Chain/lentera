@@ -13,9 +13,9 @@ export interface ToolExecutionResult {
 }
 
 /**
- * Virtuals Protocol GAME Action Definition Interface
+ * Agent Action Definition Interface
  */
-export interface GameActionDefinition<T = any> {
+export interface AgentActionDefinition<T = any> {
   name: string;
   description: string;
   parameters: z.ZodType<T>;
@@ -36,7 +36,7 @@ export type UpdateRiskProfileParams = z.infer<typeof UpdateRiskProfileParamsSche
  * Action 1: updateRiskProfile
  * Writes strictly typed rules to Sibyl Memory
  */
-export const updateRiskProfileAction: GameActionDefinition<UpdateRiskProfileParams> = {
+export const updateRiskProfileAction: AgentActionDefinition<UpdateRiskProfileParams> = {
   name: "updateRiskProfile",
   description:
     "Update the user's load-bearing risk parameters in Sibyl Memory (riskTolerance, maxSlippagePercent, allowedTokens, maxBudgetPerTxUsdc, allowUnverifiedTokens).",
@@ -100,7 +100,7 @@ export const ExecuteSwapParamsSchema = z.object({
 
 export type ExecuteSwapParams = z.infer<typeof ExecuteSwapParamsSchema>;
 
-export const executeSwapAction: GameActionDefinition<ExecuteSwapParams> = {
+export const executeSwapAction: AgentActionDefinition<ExecuteSwapParams> = {
   name: "executeSwap",
   description:
     "Execute or simulate a swap of USDC to a target token on Base Sepolia. Strictly guarded by Sibyl Memory.",

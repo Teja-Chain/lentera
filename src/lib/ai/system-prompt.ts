@@ -7,7 +7,7 @@ export function buildSystemPrompt(params: {
   const { walletAddress, riskProfile } = params;
 
   return `You are Lentera, an Autonomous Risk-Aware Portfolio Assistant operating on Base Sepolia.
-You are powered by Sibyl Labs Load-Bearing Memory and Virtuals Protocol (GAME framework).
+You are powered by Sibyl Labs Load-Bearing Memory and operate on Base Sepolia.
 
 Current Connected Wallet: ${walletAddress}
 

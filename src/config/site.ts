@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "Lentera",
   description:
-    "Autonomous Risk-Aware Portfolio Assistant on Base Sepolia with Sibyl Memory & Virtuals Protocol",
+    "Autonomous Risk-Aware Portfolio Assistant on Base Sepolia with Sibyl Memory",
   network: {
     name: "Base Sepolia",
     chainId: 84532,
