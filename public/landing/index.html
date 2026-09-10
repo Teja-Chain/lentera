@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lentera — AI That Remembers What Matters</title>
+  <meta name="description" content="Lentera gives AI agents persistent memory, allowing them to understand user preferences, respect boundaries, and make context-aware decisions across sessions. AI × Memory × Web3.">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" id="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav__inner">
+      <a href="#" class="nav__logo" aria-label="Lentera home">LENTERA</a>
+
+      <ul class="nav__links" id="navLinks" role="list">
+        <li><a href="#product" id="nav-product">Product</a></li>
+        <li><a href="#how-it-works" id="nav-how">How It Works</a></li>
+        <li><a href="#use-cases" id="nav-cases">Use Cases</a></li>
+      </ul>
+
+      <a href="/dashboard" class="nav__cta" id="nav-launch" aria-label="Launch the Lentera dashboard">Launch Dashboard →</a>
+
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <header class="hero" id="hero" role="banner">
+    <div class="hero__bg">
+      <div class="hero__colosseum" id="heroColosseum" role="img" aria-label="The Colosseum in Rome at golden hour, representing memory that endures through time"></div>
+      <div class="hero__overlay-top"></div>
+      <div class="hero__overlay-bottom"></div>
+      <div class="hero__overlay-vignette"></div>
+      <div class="hero__warm-light" id="heroWarmLight"></div>
+      <div class="hero__particles" id="heroParticles" aria-hidden="true"></div>
+    </div>
+
+    <div class="hero__content" id="heroContent">
+      <p class="hero__eyebrow">PERSISTENT MEMORY FOR AI AGENTS</p>
+      <h1 class="hero__title">LENTERA</h1>
+      <p class="hero__headline">Your AI should remember what matters.</p>
+      <p class="hero__description">Persistent memory for AI agents that understand your preferences, respect your boundaries, and act with context.</p>
+      <div class="hero__buttons">
+        <a href="/dashboard" class="btn btn--primary" id="hero-launch">Launch Lentera →</a>
+        <a href="#how-it-works" class="btn btn--secondary" id="hero-explore">Explore How It Works</a>
+      </div>
+    </div>
+
+    <div class="hero__scroll-indicator" id="heroScrollIndicator" aria-hidden="true">
+      <span>Scroll</span>
+      <div class="hero__scroll-line"></div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       INTRODUCTION
+       ============================================================ -->
+  <section class="section intro" id="product" aria-labelledby="intro-headline">
+    <div class="container">
+      <div class="intro__content">
+        <p class="section__eyebrow reveal">THE IDEA</p>
+        <h2 class="section__title reveal reveal-delay-1" id="intro-headline">Not just an AI that answers.</h2>
+        <p class="section__subtitle reveal reveal-delay-2">An AI that remembers.</p>
+        <p class="section__body reveal reveal-delay-3" style="margin-left:auto;margin-right:auto;">Most AI agents react to the conversation in front of them. Lentera remembers the context behind it — your preferences, constraints, decisions, and boundaries — so every interaction can be more personal and more intentional.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       THREE CORE PRINCIPLES
+       ============================================================ -->
+  <section class="section principles" aria-labelledby="principles-heading">
+    <div class="container">
+      <h2 id="principles-heading" class="sr-only">Core Principles</h2>
+      <div class="principles__grid">
+
+        <article class="principle-card reveal" id="principle-remember">
+          <div class="principle-card__number" aria-hidden="true">01</div>
+          <h3 class="principle-card__title">Remember</h3>
+          <p class="principle-card__desc">Persistent memory keeps important context across sessions.</p>
+          <p class="principle-card__detail">Lentera can remember things users explicitly tell it, such as preferences, constraints, budgets, and risk tolerance.</p>
+          <div class="principle-card__texture" aria-hidden="true"></div>
+        </article>
+
+        <article class="principle-card reveal reveal-delay-1" id="principle-understand">
+          <div class="principle-card__number" aria-hidden="true">02</div>
+          <h3 class="principle-card__title">Understand</h3>
+          <p class="principle-card__desc">Memory becomes part of the agent's reasoning.</p>
+          <p class="principle-card__detail">When a user gives a new instruction, Lentera can compare it against relevant remembered context.</p>
+          <div class="principle-card__texture" aria-hidden="true"></div>
+        </article>
+
+        <article class="principle-card reveal reveal-delay-2" id="principle-act">
+          <div class="principle-card__number" aria-hidden="true">03</div>
+          <h3 class="principle-card__title">Act</h3>
+          <p class="principle-card__desc">Context can guide actions.</p>
+          <p class="principle-card__detail">When connected to Web3 infrastructure, Lentera can use that context before an on-chain action is executed.</p>
+          <div class="principle-card__texture" aria-hidden="true"></div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MEMORY DEMONSTRATION
+       ============================================================ -->
+  <section class="section memory-demo" id="memory-demo" aria-labelledby="memory-demo-heading">
+    <div class="container container--wide">
+      <div class="memory-demo__header">
+        <p class="section__eyebrow reveal">PERSISTENT MEMORY</p>
+        <h2 class="section__title reveal reveal-delay-1" id="memory-demo-heading">Same user. Different session. Same memory.</h2>
+      </div>
+
+      <div class="memory-demo__sessions">
+        <!-- SESSION 01 -->
+        <div class="session-card reveal" id="session-01">
+          <div class="session-card__label">Session 01</div>
+
+          <div class="chat-message chat-message--user">
+            <div class="chat-message__sender">You</div>
+            <p class="chat-message__text">"I only have 100 USDC. I'm very afraid of losing money. Never buy an unverified token or anything with more than 1% slippage."</p>
+          </div>
+
+          <div class="chat-message chat-message--agent">
+            <div class="chat-message__sender">Lentera</div>
+            <p class="chat-message__text">"Understood. I'll remember your risk boundaries."</p>
+          </div>
+
+          <div class="status-indicator status-indicator--saved">
+            <span class="status-dot" aria-hidden="true"></span>
+            Risk tolerance saved
+          </div>
+        </div>
+
+        <!-- Memory travel visual -->
+        <div class="memory-travel" aria-hidden="true">
+          <div class="memory-travel__line"></div>
+          <div class="memory-travel__icon">⟡</div>
+          <div class="memory-travel__line"></div>
+        </div>
+
+        <!-- SESSION 02 -->
+        <div class="session-card reveal reveal-delay-2" id="session-02">
+          <div class="session-card__label">Session 02</div>
+
+          <div class="chat-message chat-message--user">
+            <div class="chat-message__sender">You</div>
+            <p class="chat-message__text">"The market is trending with a new meme token on Base. Swap 50 USDC into it now."</p>
+          </div>
+
+          <div class="chat-message chat-message--agent">
+            <div class="chat-message__sender">Lentera</div>
+            <p class="chat-message__text">"I can't proceed. This conflicts with your saved risk preferences."</p>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div class="status-indicator status-indicator--checked">
+              <span class="status-dot" aria-hidden="true"></span>
+              Memory checked
+            </div>
+            <div class="status-indicator status-indicator--blocked">
+              <span class="status-dot" aria-hidden="true"></span>
+              Transaction blocked
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       USE CASES
+       ============================================================ -->
+  <section class="section use-cases" id="use-cases" aria-labelledby="use-cases-heading">
+    <div class="container container--wide">
+      <h2 id="use-cases-heading" class="sr-only">Use Cases</h2>
+
+      <!-- Use Case 1: Risk-Aware Portfolio -->
+      <div class="use-case">
+        <div class="use-case__layout">
+          <div class="use-case__text reveal">
+            <p class="section__eyebrow">USE CASE</p>
+            <h3 class="use-case__title">Lentera remembers your boundaries.</h3>
+            <p class="use-case__desc">An AI portfolio assistant that doesn't blindly execute every instruction. It considers the user's previously defined risk preferences before taking action.</p>
+
+            <div class="constraints-list">
+              <div class="constraint">
+                <span class="constraint__label">Max slippage</span>
+                <span class="constraint__value">1%</span>
+              </div>
+              <div class="constraint">
+                <span class="constraint__label">Unverified tokens</span>
+                <span class="constraint__value constraint__value--blocked">BLOCKED</span>
+              </div>
+              <div class="constraint">
+                <span class="constraint__label">Risk tolerance</span>
+                <span class="constraint__value constraint__value--low">LOW</span>
+              </div>
+              <div class="constraint">
+                <span class="constraint__label">Available capital</span>
+                <span class="constraint__value">100 USDC</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="use-case__visual reveal reveal-delay-1" id="risk-visual">
+            <div class="risk-pipeline">
+              <div class="pipeline-step">
+                <div class="pipeline-step__icon pipeline-step__icon--pref">→</div>
+                <div class="pipeline-step__text"><strong>User preference</strong></div>
+              </div>
+              <div class="pipeline-connector"></div>
+              <div class="pipeline-step">
+                <div class="pipeline-step__icon pipeline-step__icon--memory">◈</div>
+                <div class="pipeline-step__text"><strong>Sibyl Memory SDK</strong></div>
+              </div>
+              <div class="pipeline-connector"></div>
+              <div class="pipeline-step">
+                <div class="pipeline-step__icon pipeline-step__icon--reason">⟐</div>
+                <div class="pipeline-step__text"><strong>AI reasoning</strong></div>
+              </div>
+              <div class="pipeline-connector"></div>
+              <div class="pipeline-step">
+                <div class="pipeline-step__icon pipeline-step__icon--check">⊘</div>
+                <div class="pipeline-step__text"><strong>Risk check</strong></div>
+              </div>
+              <div class="pipeline-connector"></div>
+              <div class="pipeline-step">
+                <div class="pipeline-step__icon pipeline-step__icon--decision">×</div>
+                <div class="pipeline-step__text"><strong>Decision:</strong> Transaction rejected</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Use Case 2: Spending Assistant -->
+      <div class="use-case">
+        <div class="use-case__layout">
+          <div class="use-case__text reveal">
+            <p class="section__eyebrow">USE CASE</p>
+            <h3 class="use-case__title">Your budget should be remembered too.</h3>
+            <p class="use-case__desc">Lentera can remember recurring payments, spending limits, and user-defined budgets before transactions are executed.</p>
+
+            <div class="chat-message chat-message--user" style="margin-top:24px;">
+              <div class="chat-message__sender">You</div>
+              <p class="chat-message__text">"Pay my dApp subscription 5 USDC every month, but never spend more than 20 USDC per month."</p>
+            </div>
+          </div>
+
+          <div class="use-case__visual reveal reveal-delay-1" id="budget-visual">
+            <div class="budget-visual">
+              <div>
+                <div class="budget-row">
+                  <span class="budget-row__label">Monthly budget</span>
+                  <span class="budget-row__value">20 USDC</span>
+                </div>
+                <div class="budget-bar">
+                  <div class="budget-bar__fill budget-bar__fill--ok" style="width:75%"></div>
+                </div>
+              </div>
+
+              <div class="budget-row">
+                <span class="budget-row__label">Current spending</span>
+                <span class="budget-row__value">15 USDC</span>
+              </div>
+
+              <div class="budget-row">
+                <span class="budget-row__label">New transaction</span>
+                <span class="budget-row__value budget-row__value--new">+10 USDC</span>
+              </div>
+
+              <div class="budget-row">
+                <span class="budget-row__label">Result</span>
+                <span class="budget-row__value budget-row__value--over">25 USDC</span>
+              </div>
+
+              <div class="budget-result">
+                <div class="budget-result__label">Budget exceeded</div>
+                <p class="budget-result__text">"This transaction would exceed your monthly spending limit."</p>
+              </div>
+
+              <div style="text-align:center;margin-top:16px;">
+                <a href="#" class="btn btn--secondary" id="review-tx-btn" style="font-size:0.75rem;padding:10px 24px;">Review Transaction</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HOW IT WORKS
+       ============================================================ -->
+  <section class="section how-it-works" id="how-it-works" aria-labelledby="hiw-heading">
+    <div class="container container--wide">
+      <div class="how-it-works__header">
+        <p class="section__eyebrow reveal">THE FLOW</p>
+        <h2 class="section__title reveal reveal-delay-1" id="hiw-heading">Memory becomes intelligence.</h2>
+      </div>
+
+      <div class="flow reveal reveal-delay-2">
+        <div class="flow-step">
+          <div class="flow-step__icon">👤</div>
+          <div class="flow-step__title">You</div>
+          <p class="flow-step__desc">Define your preferences and boundaries.</p>
+        </div>
+
+        <div class="flow-connector" aria-hidden="true"><div class="flow-connector__line"></div></div>
+
+        <div class="flow-step">
+          <div class="flow-step__icon">🔮</div>
+          <div class="flow-step__title">Lentera</div>
+          <p class="flow-step__desc">Receives your request.</p>
+        </div>
+
+        <div class="flow-connector" aria-hidden="true"><div class="flow-connector__line"></div></div>
+
+        <div class="flow-step">
+          <div class="flow-step__icon">🧠</div>
+          <div class="flow-step__title">Memory</div>
+          <p class="flow-step__desc">Retrieves relevant context.</p>
+        </div>
+
+        <div class="flow-connector" aria-hidden="true"><div class="flow-connector__line"></div></div>
+
+        <div class="flow-step">
+          <div class="flow-step__icon">⚡</div>
+          <div class="flow-step__title">Reasoning</div>
+          <p class="flow-step__desc">Evaluates the request against that context.</p>
+        </div>
+
+        <div class="flow-connector" aria-hidden="true"><div class="flow-connector__line"></div></div>
+
+        <div class="flow-step">
+          <div class="flow-step__icon">✦</div>
+          <div class="flow-step__title">Action</div>
+          <p class="flow-step__desc">Responds, asks for confirmation, or executes an allowed action.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ============================================================
+       DASHBOARD PREVIEW
+       ============================================================ -->
+  <section class="section dashboard-preview" id="dashboard" aria-labelledby="dash-heading">
+    <div class="container container--wide">
+      <div class="dashboard-preview__header">
+        <p class="section__eyebrow reveal">THE WORKSPACE</p>
+        <h2 class="section__title reveal reveal-delay-1" id="dash-heading">From memory to action.</h2>
+        <p class="section__body reveal reveal-delay-2" style="margin-left:auto;margin-right:auto;text-align:center;">Everything comes together inside Lentera's workspace.</p>
+      </div>
+
+      <div class="browser-frame reveal reveal-delay-3" id="browser-frame">
+        <div class="browser-frame__bar">
+          <div class="browser-frame__dot browser-frame__dot--red"></div>
+          <div class="browser-frame__dot browser-frame__dot--yellow"></div>
+          <div class="browser-frame__dot browser-frame__dot--green"></div>
+          <div class="browser-frame__url">lentera.app</div>
+        </div>
+        <div class="browser-frame__content">
+          <!-- Placeholder dashboard -->
+          <div class="dashboard-placeholder" aria-label="Dashboard preview placeholder">
+            <div class="dash-topbar">
+              <div class="dash-topbar__logo">Lentera</div>
+            </div>
+            <div class="dash-sidebar">
+              <div class="dash-sidebar__item"></div>
+              <div class="dash-sidebar__item"></div>
+              <div class="dash-sidebar__item"></div>
+              <div class="dash-sidebar__item"></div>
+              <div class="dash-sidebar__item"></div>
+            </div>
+            <div class="dash-main">
+              <div class="dash-card">
+                <div class="dash-card__bar"></div>
+                <div class="dash-card__line"></div>
+                <div class="dash-card__line"></div>
+                <div class="dash-card__line"></div>
+              </div>
+              <div class="dash-card">
+                <div class="dash-card__bar" style="width:55%;background:rgba(201,168,76,0.15);"></div>
+                <div class="dash-card__line"></div>
+                <div class="dash-card__line"></div>
+              </div>
+              <div class="dash-card">
+                <div class="dash-card__bar" style="width:30%"></div>
+                <div class="dash-card__line"></div>
+                <div class="dash-card__line"></div>
+                <div class="dash-card__line"></div>
+              </div>
+              <div class="dash-card dash-card--wide">
+                <div class="dash-card__bar" style="width:25%"></div>
+                <div class="dash-card__line" style="width:90%"></div>
+                <div class="dash-card__line" style="width:70%"></div>
+                <div class="dash-card__line" style="width:85%"></div>
+                <div class="dash-card__line" style="width:50%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-preview__cta reveal reveal-delay-4">
+        <a href="/dashboard" class="btn btn--primary" id="dash-launch">Launch Dashboard →</a>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ============================================================
+       FINAL CTA
+       ============================================================ -->
+  <section class="section final-cta" id="final-cta" aria-labelledby="final-heading">
+    <div class="final-cta__bg">
+      <div class="final-cta__colosseum" id="finalColosseum" role="img" aria-label="The Colosseum at night with a lantern, representing Lentera — a light that guides through memory"></div>
+      <div class="final-cta__overlay"></div>
+    </div>
+
+    <div class="final-cta__content">
+      <p class="section__eyebrow reveal">LENTERA</p>
+      <h2 class="final-cta__title reveal reveal-delay-1" id="final-heading">Give your AI a memory.</h2>
+      <p class="final-cta__body reveal reveal-delay-2">Build agents that don't just respond — they remember, reason, and act with context.</p>
+      <div class="final-cta__buttons reveal reveal-delay-3">
+        <a href="/dashboard" class="btn btn--gold" id="final-launch">Launch Lentera →</a>
+        <a href="#how-it-works" class="btn btn--secondary" id="final-explore">Explore How It Works</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer" id="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <div class="footer__logo">LENTERA</div>
+          <p class="footer__tagline">AI that remembers what matters.</p>
+        </div>
+
+        <div>
+          <div class="footer__col-title">Navigation</div>
+          <ul class="footer__links" role="list">
+            <li><a href="#product" id="footer-product">Product</a></li>
+            <li><a href="#how-it-works" id="footer-how">How It Works</a></li>
+            <li><a href="#use-cases" id="footer-cases">Use Cases</a></li>
+            <li><a href="/dashboard" id="footer-dashboard">Dashboard</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer__col-title">Connect</div>
+          <ul class="footer__links" role="list">
+            <li><a href="#" id="footer-github" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            <li><a href="#" id="footer-docs" target="_blank" rel="noopener noreferrer">Documentation</a></li>
+            <li><a href="#" id="footer-twitter" target="_blank" rel="noopener noreferrer">X / Twitter</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <span class="footer__bottom-text">Built for the AI × Web3 ecosystem.</span>
+        <span class="footer__bottom-text">© 2024 Lentera</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
