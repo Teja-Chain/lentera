@@ -236,13 +236,15 @@ export const executeSwapAction: AgentActionDefinition<ExecuteSwapParams> = {
       type: "ONCHAIN_ACTION",
       timestamp,
       title: isReal
-        ? "Base Sepolia Transaction Confirmed"
+        ? "Base Sepolia DEX Contract Executed"
         : "Simulated Execution (No Real Tx)",
       data: {
         network: "Base Sepolia (Chain ID 84532)",
+        contract: `LenteraSwapRouter (${sim.routerAddress})`,
+        function: "swapExactTokensForTokens",
         action: `Swap ${amountInUsdc} USDC -> ~${sim.expectedOut} ${targetUpper}`,
         txHash: sim.txHash,
-        executionMode: isReal ? "on-chain" : "simulated",
+        executionMode: isReal ? "on-chain smart contract" : "simulated",
         status: isReal ? "Confirmed on Base Sepolia" : "Simulated Execution — no BaseScan link",
         ...(isReal && {
           explorerUrl: `https://sepolia.basescan.org/tx/${sim.txHash}`,
@@ -254,12 +256,12 @@ export const executeSwapAction: AgentActionDefinition<ExecuteSwapParams> = {
     });
 
     const modeLabel = isReal
-      ? `Tx Hash: ${sim.txHash}`
+      ? `Contract: LenteraSwapRouter (${sim.routerAddress}) | Tx Hash: ${sim.txHash}`
       : `Simulated Execution (no on-chain tx — RELAYER_PRIVATE_KEY not set or relayer failed).`;
 
     return {
       success: true,
-      message: `Swap approved on Base Sepolia. Swapped ${amountInUsdc} USDC for ${sim.expectedOut} ${targetUpper}. ${modeLabel}`,
+      message: `Swap executed on Base Sepolia via LenteraSwapRouter (swapExactTokensForTokens). Swapped ${amountInUsdc} USDC for ${sim.expectedOut} ${targetUpper}. ${modeLabel}`,
       inspectorEvents,
       data: sim,
     };

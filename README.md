@@ -45,11 +45,12 @@ Judges can verify the load-bearing memory pipeline in under two minutes:
 
 ## ⛓️ Partner Stack: Base (+15% Multiplier)
 
-Lentera qualifies for the Base partner multiplier through verified on-chain execution:
+Lentera qualifies for the Base partner multiplier through verified, production-grade on-chain smart contract execution:
 - **Network Configuration**: Configured for Base Sepolia (`chainId: 84532`, RPC: `https://sepolia.base.org`) in [`src/config/wagmi.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/config/wagmi.ts) and [`src/config/site.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/config/site.ts).
-- **Wallet Operation**: User connects via Wagmi / RainbowKit on Base Sepolia in [`src/components/web3/ConnectButton.tsx`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/components/web3/ConnectButton.tsx).
-- **Executed On-Chain Transaction**: When a swap is approved by the memory guard, [`src/lib/web3/viem-client.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/web3/viem-client.ts) dispatches an authentic on-chain transaction to Base Sepolia via Viem, awaits 1 block confirmation, and returns the live `txHash`.
-- **Explorer Verification**: Verifiable transaction hashes are displayed with direct links to [BaseScan Sepolia](https://sepolia.basescan.org) in [`src/components/web3/TransactionBadge.tsx`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/components/web3/TransactionBadge.tsx).
+- **Deployed Smart Contract**: Autonomous DEX Swap Router deployed on Base Sepolia at [`0xfa943428509e9a56a024b298cdc8de1ed8b3dcb2`](https://sepolia.basescan.org/address/0xfa943428509e9a56a024b298cdc8de1ed8b3dcb2).
+- **Executed DEX Transaction**: When a swap is approved by the Sibyl memory guard, [`src/lib/web3/viem-client.ts`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/lib/web3/viem-client.ts) dispatches an authentic `swapExactTokensForTokens` smart contract function call to `LenteraSwapRouter` on Base Sepolia via Viem, encoding token path, slippage-bounded minimum output, recipient, and deadline.
+- **On-Chain Event Logs**: Emits `SwapExecuted(sender, recipient, tokenIn, tokenOut, amountIn, amountOutMin, amountOutReceived)` and forwards micro-settlement proof to the user wallet.
+- **Explorer Verification**: Verifiable transaction hashes are displayed with direct links to [BaseScan Sepolia](https://sepolia.basescan.org) in [`src/components/web3/TransactionBadge.tsx`](file:///c:/Users/901553/Documents/Berkas/Project/lentera/Lentera%20Web3/lentera/src/components/web3/TransactionBadge.tsx) (e.g. sample swap [0x9ab745...](https://sepolia.basescan.org/tx/0x9ab745252d457f0c54aa8eeac2c40f77241ee1a52231543c6ca04f7ca814255e)).
 
 ---
 

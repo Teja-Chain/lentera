@@ -13,6 +13,7 @@ export const siteConfig = {
     usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
     weth: "0x4200000000000000000000000000000000000006",
     meme: "0x9876543210987654321098765432109876543210", // Mock unverified token for Demo Session 2
-    mockRouter: "0x2a9840ef7be7aaae7d31be7a627a1c77f0d018cf",
+    router: "0xfa943428509e9a56a024b298cdc8de1ed8b3dcb2",
+    mockRouter: "0xfa943428509e9a56a024b298cdc8de1ed8b3dcb2",
   },
 };
