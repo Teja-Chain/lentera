@@ -3,14 +3,14 @@
 > **Sibyl Labs Hackathon Submission**  
 > **Partner Track:** Base (+15% Partner Multiplier) | **Network:** Base Sepolia (Chain ID: 84532)  
 > **License:** MIT (OSI-Approved)  
-> 🔗 **Live Demo App:** [https://lentera-protocol.vercel.app](https://lentera-protocol.vercel.app)
-> 📹 **Demo Video (2–5 min):** [Watch on YouTube / Loom](https://youtu.be/YOUR_VIDEO_LINK) *(Ganti dengan link video Anda)*
+> **Live Demo App:** [https://lentera-protocol.vercel.app](https://lentera-protocol.vercel.app)
+> **Demo Video (2–5 min):** [Watch on YouTube](https://youtu.be/9Z-Lmi07ONw)) 
 
 Lentera is an Autonomous Risk-Aware Portfolio Assistant operating on **Base Sepolia**. It enforces deterministic, load-bearing risk rules across distinct browser sessions using the Sibyl Memory architecture strictly scoped by wallet address.
 
 ---
 
-## 🧠 How Memory Made This Possible
+## How Memory Made This Possible
 
 Without persistent cross-session memory scoped by wallet address, an AI portfolio assistant cannot enforce deterministic guard rails. In a standard LLM agent, an impulsive user or an external attacker could simply open a new session or refresh the browser to bypass previously configured slippage limits, token whitelists, or budget caps. 
 
@@ -21,7 +21,7 @@ Sibyl Memory makes user risk parameters **load-bearing laws** that survive acros
 
 ---
 
-## 🔍 Where Memory is Load-Bearing (Critical-Path Calls)
+##  Where Memory is Load-Bearing (Critical-Path Calls)
 
 Judges can verify the load-bearing memory pipeline in under two minutes:
 
@@ -131,7 +131,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 📁 Architecture Directory Structure
+## Architecture Directory Structure
 
 ```text
 src/
@@ -175,6 +175,6 @@ src/
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the [MIT License](LICENSE) — an OSI-approved open-source license.
